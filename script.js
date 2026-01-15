@@ -297,30 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         cancelPinBtn.onclick = () => { pinModal.style.display = "none"; transactionPinInput.value = ""; pinMessage.textContent = ""; };
       });
-    }
-
-    // ===== PAY BILL =====
-    if (payBillForm) {
-      payBillForm.addEventListener("submit", e => {
-        e.preventDefault();
-        pinModal.style.display = "flex";
-        transactionPinInput.value = "";
-        pinMessage.textContent = "";
-
-          if (transactionPinInput.value === demoUser.transferPin) {
-            const billText = document.getElementById("biller").value;
-            const billAmount = parseFloat(document.getElementById("bill-amount").value);
-            processTransaction("expense", billText, billAmount);
-            payBillForm.reset();
-            pinModal.style.display = "none";
-          } else {
-            pinMessage.textContent = "Incorrect PIN!";
-          }
-        };
-        cancelPinBtn.onclick = () => { pinModal.style.display = "none"; transactionPinInput.value = ""; pinMessage.textContent = ""; };
-      });
-    }
-
+  }
 
     // ===== BALANCE TOGGLE =====
     const balanceToggleBtn = document.getElementById("toggle-balance");
@@ -385,22 +362,6 @@ document.addEventListener("DOMContentLoaded", () => {
 if (sendCard) sendCard.style.display = "none";
 if (payCard) payCard.style.display = "none";
 }
-
-// ===== REQUEST MONEY FORM =====
-const requestMoneyForm = document.getElementById("request-money-form");
-if (requestMoneyForm) {
-
-requestMoneyForm.addEventListener("submit", e => {
-    e.preventDefault();
-    pinModal.style.display = "flex";
-    pinMessage.textContent = "";
-
-    cancelPinBtn.onclick = () => {
-        pinModal.style.display = "none";
-        transactionPinInput.value = "";
-        pinMessage.textContent = "";
-    };
-});
 
 // ===== PASSWORD CHANGE FORM =====
 const passwordForm = document.getElementById("password-form");
