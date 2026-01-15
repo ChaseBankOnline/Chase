@@ -137,7 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
      // ===== PIN MODAL & SEND MONEY =====
-if (window.location.pathname.endsWith("dashboard.html")) {
   const sendForm = document.getElementById("send-money-form");
   const toggleTransferBtn = document.getElementById("toggle-transfer-btn");
   const transactionsList = document.querySelector(".transactions-card ul");
@@ -169,7 +168,7 @@ if (window.location.pathname.endsWith("dashboard.html")) {
   const cancelPinBtn = document.getElementById("cancelPinBtn");
   const transactionPinInput = document.getElementById("transactionPin");
   const pinMessage = document.getElementById("pinMessage");
-  const sendBtn = document.getElementById("sendBtn"); // Make sure your send money button has id="sendBtn"
+  const sendBtn = document.getElementById("send-btn");
   const maxAttempts = 3;
   let attemptsLeft = maxAttempts;
 
