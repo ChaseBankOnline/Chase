@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Forget Username | Front Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+  <nav class="navbar">
+    <div class="profile">
+      <span>Front Page</span>
+    </div>
+    <a href="index.html" class="logout-btn">Back</a>
+  </nav>
+
+  <main class="info-page">
+    <h1>Forgot Username</h1>
+    <p>Enter your registered email to recover your username.</p>
+
+    <form id="forget-username-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your registered email" required>
+      </div>
+      <button type="submit">Recover Username</button>
+    </form>
+
+    <p id="username-message" style="margin-top:15px; color:green;"></p>
+  </main>
+
+  <footer class="login-footer">
+    <small>&copy; 2026 Front Page, All rights reserved.</small>
+  </footer>
+
+  <script>
+    const form = document.getElementById('forget-username-form');
+    const message = document.getElementById('username-message');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('email').value.trim().toLowerCase();
+      const registeredEmail = "charlesweahh@gmail.com";
+
+      if (!emailInput) return alert("Please enter your email.");
+
+      // Simulate processing delay
+      message.style.color = "#007bff";
+      message.textContent = "Verifying email...";
+      
+      setTimeout(() => {
+        if (emailInput === registeredEmail) {
+          message.style.color = "green";
+          message.textContent = "Your username is: John Williams ✔";
+        } else {
+          message.style.color = "red";
+          message.textContent = "An error occurred: invalid email!";
+        }
+      }, 1200);
+    });
+  </script>
+
+</body>
+</html>
