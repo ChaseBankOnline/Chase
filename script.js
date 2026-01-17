@@ -1,4 +1,4 @@
-// Cleaned and improved main app JS
+// Cleaned and improved main app JS (fixed reference bugs, standardized amounts, improved safety)
 // Notes:
 // - Keeps demo/localStorage behavior for demo purposes.
 // - In production, do NOT store passwords / PINs in localStorage in plaintext.
@@ -47,14 +47,28 @@
       localStorage.setItem("transactions", JSON.stringify(savedTransactions));
     }
 
-    // ===== TOTAL BALANCE =====
+    // Helper: compute total balance from transactions (income - expense)
+    function computeBalanceFromTransactions(transactions) {
+      return (transactions || []).reduce((acc, tx) => {
+        const val = parseAmount(tx.amount);
+        if (isNaN(val)) return acc;
+        return tx.type === "expense" ? acc - val : acc + val;
+      }, 0);
+    }
+
+     // ===== TOTAL BALANCE =====
     const balanceEl = document.querySelector(".balance");
     let totalBalance = parseFloat(localStorage.getItem("totalBalance"));
-    if (isNaN(totalBalance)) {
-      totalBalance = balanceEl ? parseAmount(balanceEl.textContent) || 0 : 0;
-    }
-    if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
 
+    // Only set manual balance if nothing is stored yet
+    if (isNaN(totalBalance)) {
+    totalBalance = 1500450.50; // <-- starting balance manually
+    localStorage.setItem("totalBalance", String(totalBalance));
+   }
+
+    // Update display
+    if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
+    
     // ===== LOGIN FORM =====
     const loginForm = $("login-form");
     const messageEl = $("login-message");
@@ -73,11 +87,12 @@
         }
 
         if (messageEl) {
-          messageEl.style.color = "blue";
+            messageEl.style.color = "blue";
           messageEl.textContent = "Checking credentials...";
         }
 
         setTimeout(() => {
+          // Demo uses fullName as username (that's intentional in this demo)
           if (username === demoUser.fullName && password === demoUser.password) {
             localStorage.setItem("loggedIn", "true");
             if (messageEl) {
@@ -122,8 +137,6 @@
         left.textContent = tx.text || "";
         const right = document.createElement("span");
         // show negative sign for expense
-        right.textContent = (tx.type === "expense" ? "-" : "") + formatCurrency(isNaN(amt) ? 0 : amt).replace(/^\$/, "");
-        // Prepend "$"
         right.textContent = (tx.type === "expense" ? "-$" : "$") + (isNaN(amt) ? "0.00" : Number(amt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         li.appendChild(left);
         li.appendChild(right);
@@ -151,7 +164,6 @@
           } catch (e) { console.warn("Skipping invalid transaction:", tx); }
         });
 
-        // Keep previous chart instance if re-rendering? For simplicity we create a new one.
         new Chart(ctx, {
           type: "bar",
           data: {
@@ -196,13 +208,17 @@
     `;
     document.body.appendChild(pinModal);
 
+    // Query modal elements after append
     const confirmPinBtn = $("confirmPinBtn");
     const cancelPinBtn = $("cancelPinBtn");
     const transactionPinInput = $("transactionPin");
     const pinMessage = $("pinMessage");
     const maxAttempts = 3;
     let attemptsLeft = maxAttempts;
-    let pendingTransaction = null; // { action: "send"|"pay"|"request", details: {...} }
+
+    // pendingTransaction must be declared before any handler uses it
+    // Standard shape: { action: "send"|"pay"|"request", details: {...} }
+    let pendingTransaction = null;
 
     function resetPinState() {
       attemptsLeft = maxAttempts;
@@ -238,7 +254,7 @@
       // Add to transaction list (safe DOM)
       if (transactionsList) {
         const li = document.createElement("li");
-        li.classList.add(type);
+        if (type) li.classList.add(type);
         const left = document.createElement("span");
         left.textContent = text;
         const right = document.createElement("span");
@@ -246,16 +262,6 @@
         li.appendChild(left);
         li.appendChild(right);
         transactionsList.insertBefore(li, transactionsList.firstChild);
-      }
-
-      // Show success modal if present
-      const successModal = $("success-modal");
-      if (status === "completed" && successModal) {
-        successModal.style.display = "flex";
-        const rid = $("r-id"); if (rid) rid.textContent = Math.floor(Math.random() * 1000000);
-        const rname = $("r-name"); if (rname) rname.textContent = text;
-        const ramount = $("r-amount"); if (ramount) ramount.textContent = Number(amtValue).toFixed(2);
-        const rdate = $("r-date"); if (rdate) rdate.textContent = new Date().toLocaleDateString();
       }
     }
 
@@ -281,28 +287,16 @@
         if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
         if (amount > totalBalance) return alert("Insufficient funds.");
 
-        // Wells Fargo special case
-        if (bank === "WEF" && account === "15623948807") {
-          if (sendBtn) sendBtn.disabled = true;
-          let dots = 0;
-          if (sendBtn) sendBtn.textContent = "Processing";
-          const loader = setInterval(() => {
-            dots = (dots + 1) % 4;
-            if (sendBtn) sendBtn.textContent = "Processing" + ".".repeat(dots);
-          }, 400);
-          setTimeout(() => {
-            clearInterval(loader);
-            if (sendForm) sendForm.style.display = "none";
-            if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
-            window.location.href = "error.html";
-          }, 4000);
-          return;
-        }
-
-        // Store pending transaction and open PIN modal
+        // Store pending transaction and open PIN modal. Use action "send" to match PIN handler
         pendingTransaction = {
           action: "send",
-          details: { bank, account, recipient, amount, note }
+          details: {
+            recipient: recipient,
+            account: account,
+            bank: bank,
+            amount: amount,
+            note: note
+          }
         };
 
         if (pinModal) {
@@ -361,49 +355,153 @@
     if (confirmPinBtn) {
       confirmPinBtn.addEventListener("click", () => {
         if (!transactionPinInput) return;
+
+        // ===== PIN VALIDATION =====
         if (transactionPinInput.value !== demoUser.transferPin) {
           attemptsLeft--;
-          if (pinMessage) pinMessage.textContent = attemptsLeft > 0 ? `Incorrect PIN. ${attemptsLeft} attempt(s) remaining.` : "Maximum attempts reached!";
+          if (pinMessage) pinMessage.textContent = attemptsLeft > 0
+            ? `Incorrect PIN. ${attemptsLeft} attempt(s) remaining.`
+            : "Maximum attempts reached!";
           transactionPinInput.value = "";
           if (attemptsLeft <= 0) {
-            // temporary cooldown: disable confirm for 5 seconds
             confirmPinBtn.disabled = true;
-            setTimeout(() => {
-              resetPinState();
-            }, 5000);
+            setTimeout(() => resetPinState(), 5000);
             setTimeout(() => { if (pinModal) pinModal.style.display = "none"; }, 1000);
           }
           return;
         }
 
-        // PIN correct: perform pending action
+        // PIN correct: hide PIN modal immediately
+        if (pinModal) pinModal.style.display = "none";
+
         if (!pendingTransaction) {
           if (pinMessage) pinMessage.textContent = "No pending transaction.";
           return;
         }
 
         const { action, details } = pendingTransaction;
-        if (action === "send") {
-          const { bank, recipient, amount, note } = details;
-          processTransaction("expense", `Transfer to ${recipient} (${bank})${note ? " — " + note : ""}`, amount);
-          if (sendForm) { sendForm.reset(); sendForm.style.display = "none"; }
-          if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
-        } else if (action === "pay") {
-          const { billText, billAmount } = details;
-          processTransaction("expense", billText, billAmount);
-          if (payBillForm) { payBillForm.reset(); payBillForm.style.display = "none"; }
-        } else if (action === "request") {
-          const { recipient, amount } = details;
-          processTransaction("income", `Money Requested from ${recipient}`, amount, "pending");
-          if (requestMoneyForm) { requestMoneyForm.reset(); requestMoneyForm.style.display = "none"; }
-        }
 
-        pendingTransaction = null;
-        if (pinModal) pinModal.style.display = "none";
-        resetPinState();
+        // Determine target button for processing animation
+        let targetBtn = null;
+        if (action === "send") targetBtn = sendBtn;
+        else if (action === "pay") targetBtn = payBillForm ? payBillForm.querySelector("button[type='submit']") : null;
+        else if (action === "request") targetBtn = requestMoneyForm ? requestMoneyForm.querySelector("button[type='submit']") : null;
+
+        // Start processing animation
+        if (targetBtn) {
+          targetBtn.disabled = true;
+          let dots = 0;
+          const originalText = targetBtn.textContent;
+          const loader = setInterval(() => {
+            dots = (dots + 1) % 4;
+            targetBtn.textContent = "Processing" + ".".repeat(dots);
+          }, 400);
+
+          setTimeout(() => {
+            clearInterval(loader);
+
+            // ===== SPECIAL CASE: Wells Fargo GOES TO ERROR PAGE =====
+            if (action === "send" && details.bank === "WEF" && details.account === "15623948807") {
+              if (sendForm) sendForm.reset();
+              if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
+              targetBtn.disabled = false;
+              window.location.href = "error.html";
+              pendingTransaction = null;
+              resetPinState();
+              return;
+            }
+
+            // ===== PERFORM TRANSACTION =====
+            if (action === "send") {
+              const { bank, recipient, amount, note } = details;
+              processTransaction(
+                "expense",
+                `Transfer to ${recipient} (${bank})${note ? " — " + note : ""}`,
+                amount,
+                "completed"
+              );
+              if (sendForm) sendForm.reset();
+              if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
+            } else if (action === "pay") {
+              const { billText, billAmount } = details;
+              processTransaction("expense", billText, billAmount, "completed");
+              if (payBillForm) payBillForm.reset();
+            } else if (action === "request") {
+              const { recipient, amount } = details;
+              const txObj = {
+                type: "income",
+                text: `Money Requested from ${recipient}`,
+                amount: amount,
+                date: new Date().toISOString().split("T")[0],
+                status: "pending"
+              };
+              savedTransactions.unshift(txObj);
+              saveTransactionsAndBalance();
+              if (transactionsList) renderTransactions();
+              if (requestMoneyForm) requestMoneyForm.reset();
+            }
+
+            // ===== SHOW SUCCESS MODAL =====
+            const successModal = $("success-modal");
+            if (successModal) {
+             successModal.style.display = "flex";
+              // Store last transaction globally for PDF
+              window.lastTransactionDetails = details;
+              window.lastTransactionAction = action; // optional, for context
+              successModal.style.position = "fixed";
+              successModal.style.top = "50%";
+              successModal.style.left = "50%";
+              successModal.style.transform = "translate(-50%, -50%)";
+              successModal.style.zIndex = 2000;
+
+              const rid = $("r-id"); if (rid) rid.textContent = Math.floor(Math.random() * 1000000);
+              const rref = $("r-ref");
+              if (rref) rref.textContent = "REF" + Math.floor(100000000 + Math.random() * 900000000);
+              const rname = $("r-name");
+              if (rname) rname.textContent = action === "request" ? `Pending: ${details.recipient}` :
+                (action === "send" ? details.recipient : details.billText);
+              const rRecipient = $("r-recipient");
+              if (rRecipient) {
+                if (action === "send") rRecipient.textContent = `${details.recipient} — ${details.account} (${details.bank})`;
+                else if (action === "pay") rRecipient.textContent = details.billText;
+                else if (action === "request") rRecipient.textContent = details.recipient;
+                else rRecipient.textContent = "[Insert Beneficiary Name / Account Details]";
+              }
+
+              const ramount = $("r-amount");
+              if (ramount) {
+                if (action === "send") ramount.textContent = Number(details.amount).toFixed(2);
+                else if (action === "pay") ramount.textContent = Number(details.billAmount).toFixed(2);
+                else if (action === "request") ramount.textContent = Number(details.amount).toFixed(2);
+                else ramount.textContent = "0.00";
+              }
+
+              const rdate = $("r-date");
+              const rtime = $("r-time");
+              const now = new Date();
+
+              if (rdate) rdate.textContent = now.toLocaleDateString(); // local date
+              if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false }); // local time
+
+              const modalHeading = successModal.querySelector("h2");
+              if (modalHeading) {
+                modalHeading.textContent = action === "request" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
+              }
+            }
+
+            // Reset button and pending transaction
+            targetBtn.disabled = false;
+            // Restore original label
+            if (originalText) targetBtn.textContent = originalText;
+
+            pendingTransaction = null;
+            resetPinState();
+          }, 4000); // 4 seconds processing
+        }
       });
     }
 
+    // ===== PIN CANCEL =====
     if (cancelPinBtn) {
       cancelPinBtn.addEventListener("click", () => {
         if (pinModal) pinModal.style.display = "none";
@@ -437,13 +535,13 @@
     });
 
     // ===== SUCCESS MODAL & DOWNLOAD RECEIPT =====
-    const successModal = $("success-modal");
+    const successModalEl = $("success-modal");
     const closeReceiptBtn = $("close-receipt");
     const downloadReceiptBtn = $("download-receipt");
 
-    if (closeReceiptBtn && successModal) closeReceiptBtn.addEventListener("click", () => successModal.style.display = "none");
+    if (closeReceiptBtn && successModalEl) closeReceiptBtn.addEventListener("click", () => successModalEl.style.display = "none");
     document.addEventListener("click", e => {
-      if (successModal && successModal.style.display === "flex" && !successModal.contains(e.target)) successModal.style.display = "none";
+      if (successModalEl && successModalEl.style.display === "flex" && !successModalEl.contains(e.target)) successModalEl.style.display = "none";
     });
 
     if (downloadReceiptBtn) {
@@ -451,27 +549,105 @@
         if (!window.jspdf) return alert("PDF export not available.");
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const id = $("r-id") ? $("r-id").textContent : "";
-        const name = $("r-name") ? $("r-name").textContent : "";
-        const amount = $("r-amount") ? $("r-amount").textContent : "";
-        const date = $("r-date") ? $("r-date").textContent : "";
 
+        // Auto-fill reference number if empty
+        if ($("r-ref") && !$("r-ref").textContent) {
+          $("r-ref").textContent = "REF" + Math.floor(100000000 + Math.random() * 900000000);
+        }
+
+        // Auto-fill time-stamp if empty (UTC)
+        if ($("r-time") && !$("r-time").textContent) {
+          const now = new Date();
+          const hh = now.getUTCHours().toString().padStart(2, "0");
+          const mm = now.getUTCMinutes().toString().padStart(2, "0");
+          const ss = now.getUTCSeconds().toString().padStart(2, "0");
+          $("r-time").textContent = `${hh}:${mm}:${ss} — UTC`;
+        }
+
+        // Get all values from the modal (ensures filled correctly)
+        const id = $("r-id") ? $("r-id").textContent : "TX" + Math.floor(100000 + Math.random() * 900000);
+        const ref = $("r-ref") ? $("r-ref").textContent : "REF" + Math.floor(100000000 + Math.random() * 900000000);
+        const date = $("r-date") ? $("r-date").textContent : new Date().toLocaleDateString();
+        const time = $("r-time") ? $("r-time").textContent : new Date().toLocaleTimeString("en-US", { hour12: false }) + " — UTC";
+        const amount = $("r-amount") ? $("r-amount").textContent : "0.00";
+        const fee = $("r-fee") ? $("r-fee").textContent : "0.00";
+        const recipient = $("r-recipient") ? $("r-recipient").textContent : "[Insert Beneficiary Name / Account Details]";
+
+        // PDF styling
+        let y = 20; // vertical position start
+        // Bank logo (top-left)
+        const logo = new Image();
+        logo.src = "chase-logo.png"; // path to your logo
+        doc.addImage(logo, "PNG", 20, 12, 35, 12);
+        // Watermark
+        doc.setTextColor(220);
+        doc.setFontSize(40);
+        doc.text("CONFIDENTIAL", 105, 150, {
+        align: "center",
+        angle: 30
+       });
+        doc.setTextColor(0); // reset color
         doc.setFontSize(18);
-        doc.text("Transaction Receipt", 105, 20, { align: "center" });
+        doc.setFontSize(18);
+        doc.text("JPMORGAN CHASE BANK", 105, y, { align: "center" });
+        y += 8;
+
+        doc.setFontSize(14);
+        doc.text("PAYMENT RECEIPT", 105, y, { align: "center" });
+        y += 6;
+        y += 10;
         doc.setLineWidth(0.5);
-        doc.line(20, 25, 190, 25);
+        doc.line(20, y, 190, y);
+        y += 10;
+
         doc.setFontSize(12);
-        doc.text(`Transaction ID: ${id}`, 20, 40);
-        doc.text(`Recipient: ${name}`, 20, 50);
-        doc.text(`Amount: ${amount}`, 20, 60);
-        doc.text(`Date: ${date}`, 20, 70);
+        // Transaction Info
+        doc.text(`Transaction ID: ${id}`, 20, y); y += 8;
+        doc.text(`Reference Number: ${ref}`, 20, y); y += 8;
+        doc.text(`Payment Date: ${date}`, 20, y); y += 8;
+        doc.text(`Time‑Stamp: ${time}`, 20, y); y += 12;
+
+        // Transfer Details
+        doc.setFontSize(14); doc.text("Transfer Details", 20, y); y += 8;
+        doc.setFontSize(12);
+        doc.text(`Payment Amount: ${formatCurrency(parseAmount(amount))}`, 20, y); y += 8;
+        doc.text(`Transaction Fee: ${formatCurrency(parseAmount(fee))}`, 20, y); y += 8;
+
+        // Account Info
+        doc.setFontSize(14); doc.text("Account Information", 20, y); y += 8;
+        doc.setFontSize(12);
+        doc.text("From Account: JPMorgan Chase Bank, N.A. (****8433)", 20, y); y += 8;
+        doc.text("SWIFT / BIC: CHASUS33", 20, y); y += 8;
+        const details = window.lastTransactionDetails;
+        if (!details) return alert("No transaction data available for PDF.");
+
+        doc.text(`To Account: ${details.recipient} — ${details.account} (${details.bank || "N/A"})`, 20, y); 
+        y += 12;
+        
+        // Authorization Statement
+        doc.setFontSize(14); doc.text("Authorization Statement", 20, y); y += 8;
+        doc.setFontSize(12);
+        const authText = "I hereby confirm that I have authorized an electronic debit from my payment account in the amount stated above. This transaction was approved by the account holder and processed in accordance with applicable banking regulations.";
+        const splitAuth = doc.splitTextToSize(authText, 170); // wrap text
+        doc.text(splitAuth, 20, y);
+        y += splitAuth.length * 7 + 4;
+
+        // Transaction Status
+        doc.setFontSize(12);
+        doc.text("Transaction Status: Completed / Successful", 20, y); y += 12;
+
+        // Footer
+        doc.setLineWidth(0.5);
+        doc.line(20, y, 190, y); y += 6;
         doc.setFontSize(10);
-        doc.text("Thank you for using our service!", 105, 280, { align: "center" });
+        doc.text("This receipt was generated electronically.", 105, y, { align: "center" });
+
+        // Save PDF
         doc.save(`${id || "receipt"}.pdf`);
       });
     }
 
-  // ===== QUICK ACTION CARDS =====
+    // ===== QUICK ACTION CARDS =====
     const quickButtons = document.querySelectorAll(".quick-btn");
     quickButtons.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -558,4 +734,4 @@
     if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
     if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
   });
-})();
+})();                                
