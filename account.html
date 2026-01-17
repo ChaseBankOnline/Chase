@@ -1,1 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Account Settings | Front Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<script>
+  if (!localStorage.getItem("loggedIn")) {
+    window.location.href = "index.html";
+  }
+</script>
+
+<nav class="navbar">
+  <div class="profile">Front Page</div>
+  <a href="dashboard.html" class="logout-btn">Back to Dashboard</a>
+</nav>
+
+<main class="info-page">
+  <h1>Account Settings</h1>
+
+  <!-- Account Details -->
+  <section>
+    <h2>Account Details</h2>
+    <p>
+      Account Number:
+      <span id="accountNumber" class="masked">**** **** 8433</span>
+      <button id="toggleAccountNumber">Show</button>
+    </p>
+    <p>Account Type: <strong>Checking</strong></p>
+    <p>Balance: <span id="accountBalance" class="masked">$••••••</span></p>
+  </section>
+
+  <!-- Daily Transfer Limit -->
+  <section>
+    <h2>Daily Transfer Limit</h2>
+    <form id="limits-form">
+      <input type="number" id="dailyLimit" min="0" step="100" required placeholder="Enter daily limit">
+      <button type="submit">Update Limit</button>
+      <p id="limitMessage" class="message"></p>
+    </form>
+  </section>
+
+  <!-- Linked Accounts -->
+  <section>
+    <h2>Linked Accounts</h2>
+    <ul id="linkedAccounts"></ul>
+    <button id="addAccountBtn">Add Linked Account</button>
+    <p id="linkedMessage" class="message"></p>
+  </section>
+
+  <!-- Transaction Alerts -->
+  <section>
+    <h2>Transaction Alerts</h2>
+    <div class="toggle-switch">
+      <input type="checkbox" id="txnEmailNotif">
+      <label for="txnEmailNotif">Email alerts for transactions above $1000</label>
+    </div>
+    <div class="toggle-switch">
+      <input type="checkbox" id="txnSMSNotif">
+      <label for="txnSMSNotif">SMS alerts for transactions above $1000</label>
+    </div>
+    <button id="saveAlertsBtn">Save Alerts</button>
+    <p id="alertsMessage" class="message"></p>
+  </section>
+
+  <section>
+    <button id="logoutBtn">Logout</button>
+  </section>
+</main>
+
+<footer class="login-footer">
+  <small>&copy; 2026 Front Page. All rights reserved.</small>
+</footer>
+
+<script>
+  // ===== DEFAULT DATA =====
+  const defaultAccount = {
+    accountNumber: "21908488433",
+    balance: 1500450.50,
+    dailyLimit: 40000,
+    linkedAccounts: [
+      { bank:"Bank of America", number:"5678" },
+      { bank:"Chase Bank", number:"9012" }
+    ],
+    txnEmailAlerts:true,
+    txnSMSAlerts:false
+  };
+
+  let accountData = JSON.parse(localStorage.getItem("accountData")) || defaultAccount;
+  localStorage.setItem("accountData", JSON.stringify(accountData));
+
+  // ===== ACCOUNT VISIBILITY =====
+  const accountNumberEl = document.getElementById("accountNumber");
+  const accountBalanceEl = document.getElementById("accountBalance");
+  const toggleBtn = document.getElementById("toggleAccountNumber");
+  let visible = false;
+  toggleBtn.onclick = () => {
+    visible = !visible;
+    accountNumberEl.textContent = visible 
+      ? accountData.accountNumber.replace(/(\d{4})(?=\d)/g,"$1 ") 
+      : "**** **** 8433";
+    accountBalanceEl.textContent = visible 
+      ? "$" + accountData.balance.toLocaleString(undefined,{minimumFractionDigits:2}) 
+      : "$••••••";
+    toggleBtn.textContent = visible ? "Hide" : "Show";
+  };
+
+  // ===== DAILY LIMIT =====
+  const dailyLimitInput = document.getElementById("dailyLimit");
+  const limitMessage = document.getElementById("limitMessage");
+  dailyLimitInput.value = accountData.dailyLimit;
+  document.getElementById("limits-form").onsubmit = e => {
+    e.preventDefault();
+    const newLimit = Number(dailyLimitInput.value);
+    if (newLimit <= 0 || isNaN(newLimit)) {
+      limitMessage.textContent = "Invalid daily limit!";
+      limitMessage.className = "message error";
+      return;
+    }
+    accountData.dailyLimit = newLimit;
+    localStorage.setItem("accountData", JSON.stringify(accountData));
+    limitMessage.textContent = "Daily limit updated ✔";
+    limitMessage.className = "message success";
+  };
+
+  // ===== LINKED ACCOUNTS =====
+  const linkedList = document.getElementById("linkedAccounts");
+  const linkedMessage = document.getElementById("linkedMessage");
+
+  function renderLinkedAccounts() {
+    linkedList.innerHTML = "";
+    accountData.linkedAccounts.forEach((acc,i)=>{
+      const li = document.createElement("li");
+      li.innerHTML = `${acc.bank} — **** ${acc.number} <button class="remove-btn" data-index="${i}">Remove</button>`;
+      linkedList.appendChild(li);
+    });
+  }
+  renderLinkedAccounts();
+
+  document.getElementById("addAccountBtn").onclick = () => {
+    const bank = prompt("Bank name:");
+    const number = prompt("Last 4 digits:");
+    if (bank && number && number.length === 4) {
+      accountData.linkedAccounts.push({ bank, number });
+      localStorage.setItem("accountData", JSON.stringify(accountData));
+      renderLinkedAccounts();
+      linkedMessage.textContent = "Linked account added ✔";
+      linkedMessage.className = "message success";
+    }
+  };
+
+  linkedList.onclick = e => {
+    if(e.target.classList.contains("remove-btn")){
+      accountData.linkedAccounts.splice(e.target.dataset.index,1);
+      localStorage.setItem("accountData", JSON.stringify(accountData));
+      renderLinkedAccounts();
+      linkedMessage.textContent = "Linked account removed ✔";
+      linkedMessage.className = "message success";
+    }
+  };
+
+  // ===== ALERTS =====
+  const txnEmailNotif = document.getElementById("txnEmailNotif");
+  const txnSMSNotif = document.getElementById("txnSMSNotif");
+  const saveAlertsBtn = document.getElementById("saveAlertsBtn");
+  const alertsMessage = document.getElementById("alertsMessage");
+
+  txnEmailNotif.checked = accountData.txnEmailAlerts;
+  txnSMSNotif.checked = accountData.txnSMSAlerts;
+
+  saveAlertsBtn.onclick = () => {
+    accountData.txnEmailAlerts = txnEmailNotif.checked;
+    accountData.txnSMSAlerts = txnSMSNotif.checked;
+    localStorage.setItem("accountData", JSON.stringify(accountData));
+    alertsMessage.textContent = "Alerts saved ✔";
+    alertsMessage.className = "message success";
+  };
+
+  // ===== LOGOUT =====
+  document.getElementById("logoutBtn").onclick = () => {
+    localStorage.removeItem("loggedIn");
+    window.location.href="index.html";
+  };
+</script>
+
+</body>
+</html>
