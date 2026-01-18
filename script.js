@@ -278,7 +278,6 @@
         li.appendChild(viewBtn);
         
         transactionsList.insertBefore(li, transactionsList.firstChild);
-        transactionsList.insertBefore(li, transactionsList.firstChild);
       }
     }
 
