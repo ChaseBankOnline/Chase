@@ -485,13 +485,22 @@
               if (payBillForm) payBillForm.reset();
             } else if (action === "request") {
               const { recipient, amount } = details;
+
               const txObj = {
-                type: "income",
-                text: `Money Requested from ${recipient}`,
-                amount: amount,
-                date: new Date().toISOString().split("T")[0],
-                status: "pending"
-              };
+              id: Math.floor(Math.random() * 1000000),
+              ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+              type: type,        // "income" or "expense"
+              text: text,        // display text
+              amount: amtValue,  // numeric
+              date: new Date().toISOString(),
+              status: status,
+              // Optional extra fields for PDF
+              recipient: pendingTransaction?.details?.recipient || "",
+              account: pendingTransaction?.details?.account || "",
+              bank: pendingTransaction?.details?.bank || "",
+              note: pendingTransaction?.details?.note || ""
+            };
+              
               savedTransactions.unshift(txObj);
               saveTransactionsAndBalance();
               if (transactionsList) renderTransactions();
@@ -503,7 +512,7 @@
             if (successModal) {
              successModal.style.display = "flex";
               // Store last transaction globally for PDF
-              window.lastTransactionDetails = details;
+              window.lastTransactionDetails = txObj; // <-- new
               window.lastTransactionAction = action; // optional, for context
               successModal.style.position = "fixed";
               successModal.style.top = "50%";
