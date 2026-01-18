@@ -29,7 +29,7 @@
         fullName: "Charles Williams",
         email: "Charlesweahh@gmail.com",
         phone: "+1 510 367 1796",
-        password: "1346000",
+        password: "1346222",
         transferPin: "1234",
         emailNotif: true,
         smsNotif: false
@@ -40,12 +40,10 @@
     // ===== INITIAL TRANSACTIONS =====
     let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
     if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
-    savedTransactions = [
-      { type: "expense", text: "Netflix — Entertainment", amount: "$150", date: "2026-01-05",
-      recipient: "Netflix", account: "XXXX", bank: "N/A", note: "" },
-      { type: "income", text: "Salary — Deposit", amount: "$69000", date: "2026-01-09",
-      recipient: "Company Inc.", account: "XXXX", bank: "Bank XYZ", note: "" }
-    ];
+      savedTransactions = [
+        { type: "expense", text: "Netflix — Entertainment", amount: "$150", date: "2026-01-05" },
+        { type: "income", text: "Salary — Deposit", amount: "$69000", date: "2026-01-09" }
+      ];
       localStorage.setItem("transactions", JSON.stringify(savedTransactions));
     }
 
@@ -142,14 +140,6 @@
         right.textContent = (tx.type === "expense" ? "-$" : "$") + (isNaN(amt) ? "0.00" : Number(amt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         li.appendChild(left);
         li.appendChild(right);
-        
-        const viewBtn = document.createElement("button");
-        viewBtn.textContent = "View Receipt";
-        viewBtn.style.marginLeft = "10px";
-        viewBtn.classList.add("view-receipt-btn");
-        viewBtn.addEventListener("click", () => showTransactionReceipt(tx));
-        li.appendChild(viewBtn);
-        
         transactionsList.insertBefore(li, transactionsList.firstChild);
       });
     }
@@ -249,20 +239,14 @@
 
       // Prepend to savedTransactions as an object (keep original shape for demo)
       const txObj = {
-      id: Math.floor(Math.random() * 1000000),
-      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-      type: "income",
-      text: `Request from ${details.recipient}`,
-      amount: details.amount,
-      date: new Date().toISOString(),
-      status: "pending",
-      recipient: details.recipient
-     };
-      
+        type: type,
+        text: text,
+        amount: amtValue, // store numeric amount
+        date: new Date().toISOString().split('T')[0],
+        status: status
+      };
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
-      renderTransactions();
-      window.lastTransactionDetails = txObj;
 
       // Update balance display
       if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
@@ -277,58 +261,9 @@
         right.textContent = (type === "expense" ? "-$" : "$") + Number(amtValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         li.appendChild(left);
         li.appendChild(right);
-
-        const viewBtn = document.createElement("button");
-        viewBtn.textContent = "View Receipt";
-        viewBtn.style.marginLeft = "10px";
-        viewBtn.classList.add("view-receipt-btn");
-        viewBtn.addEventListener("click", () => showTransactionReceipt(txObj));
-        li.appendChild(viewBtn);
-        
         transactionsList.insertBefore(li, transactionsList.firstChild);
       }
     }
-
-  function showTransactionReceipt(tx) {
-  const successModal = $("success-modal");
-  if (!successModal) return;
-
-  // Show modal
-  successModal.style.display = "flex";
-
-  // Fill modal with transaction info
-  $("r-id").textContent = tx.id || Math.floor(Math.random() * 1000000);
-  $("r-ref").textContent = tx.ref || "REF" + Math.floor(100000000 + Math.random() * 900000000);
-  const now = new Date();
-  $("r-date").textContent = now.toLocaleDateString();
-  $("r-time").textContent = now.toLocaleTimeString('en-US', { hour12: false });
-
-  // Fill transaction details
-  $("r-amount").textContent = parseAmount(tx.amount).toFixed(2);
-  $("r-fee").textContent = "0.00";
-
-  if (tx.type === "send") {
-    $("r-recipient").textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
-    $("r-name").textContent = tx.recipient || "[Name]";
-  } else if (tx.type === "pay") {
-    $("r-recipient").textContent = tx.text;
-    $("r-name").textContent = tx.text;
-  } else if (tx.type === "request") {
-    $("r-recipient").textContent = tx.recipient || "[Name]";
-    $("r-name").textContent = tx.recipient || "[Name]";
-  } else {
-    $("r-recipient").textContent = tx.text;
-    $("r-name").textContent = tx.text;
-  }
-
-  const modalHeading = successModal.querySelector("h2");
-  if (modalHeading) {
-    modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
-  }
-
-  // Store transaction globally for download button
-  window.lastTransactionDetails = tx;
-  }
 
     // ===== SEND MONEY =====
     if (sendForm) {
@@ -491,45 +426,27 @@
               const { billText, billAmount } = details;
               processTransaction("expense", billText, billAmount, "completed");
               if (payBillForm) payBillForm.reset();
-              } else if (action === "request") {
+            } else if (action === "request") {
               const { recipient, amount } = details;
-
-              // Corrected request transaction object
               const txObj = {
-              id: Math.floor(Math.random() * 1000000),
-              ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-              type: "income",                    // explicitly define type as income
-              text: `Request from ${recipient}`, // clear text for display
-              amount: amount,                     // numeric amount
-              date: new Date().toISOString(),
-              status: "pending",
-              recipient: recipient,
-              account: pendingTransaction?.details?.account || "",
-              bank: pendingTransaction?.details?.bank || "",
-              note: pendingTransaction?.details?.note || ""
-             };
-
-             // Save transaction
-             savedTransactions.unshift(txObj);
-             saveTransactionsAndBalance();
-
-             // Render updated transaction list
-             if (transactionsList) renderTransactions();
-
-             // Reset request form
-             if (requestMoneyForm) requestMoneyForm.reset();
-
-             // Store globally for receipt download
-             window.lastTransactionDetails = txObj;
-             window.lastTransactionAction = action;
+                type: "income",
+                text: `Money Requested from ${recipient}`,
+                amount: amount,
+                date: new Date().toISOString().split("T")[0],
+                status: "pending"
+              };
+              savedTransactions.unshift(txObj);
+              saveTransactionsAndBalance();
+              if (transactionsList) renderTransactions();
+              if (requestMoneyForm) requestMoneyForm.reset();
             }
 
-            // ===== SHOW SUCCESS MODAL =====
+               // ===== SHOW SUCCESS MODAL =====
             const successModal = $("success-modal");
             if (successModal) {
              successModal.style.display = "flex";
               // Store last transaction globally for PDF
-              window.lastTransactionDetails = txObj; // <-- new
+              window.lastTransactionDetails = details;
               window.lastTransactionAction = action; // optional, for context
               successModal.style.position = "fixed";
               successModal.style.top = "50%";
@@ -537,7 +454,34 @@
               successModal.style.transform = "translate(-50%, -50%)";
               successModal.style.zIndex = 2000;
 
-              showTransactionReceipt(txObj);
+              const rid = $("r-id"); if (rid) rid.textContent = Math.floor(Math.random() * 1000000);
+              const rref = $("r-ref");
+              if (rref) rref.textContent = "REF" + Math.floor(100000000 + Math.random() * 900000000);
+              const rname = $("r-name");
+              if (rname) rname.textContent = action === "request" ? `Pending: ${details.recipient}` :
+                (action === "send" ? details.recipient : details.billText);
+              const rRecipient = $("r-recipient");
+              if (rRecipient) {
+                if (action === "send") rRecipient.textContent = `${details.recipient} — ${details.account} (${details.bank})`;
+                else if (action === "pay") rRecipient.textContent = details.billText;
+                else if (action === "request") rRecipient.textContent = details.recipient;
+                else rRecipient.textContent = "[Insert Beneficiary Name / Account Details]";
+              }
+
+              const ramount = $("r-amount");
+              if (ramount) {
+                if (action === "send") ramount.textContent = Number(details.amount).toFixed(2);
+                else if (action === "pay") ramount.textContent = Number(details.billAmount).toFixed(2);
+                else if (action === "request") ramount.textContent = Number(details.amount).toFixed(2);
+                else ramount.textContent = "0.00";
+              }
+
+              const rdate = $("r-date");
+              const rtime = $("r-time");
+              const now = new Date();
+
+              if (rdate) rdate.textContent = now.toLocaleDateString(); // local date
+              if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false }); // local time
 
               const modalHeading = successModal.querySelector("h2");
               if (modalHeading) {
@@ -790,4 +734,4 @@
     if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
     if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
   });
-})();                                
+})();
