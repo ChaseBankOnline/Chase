@@ -650,3 +650,19 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   background-color: #ccc;
   color: #333;
 }
+
+.view-receipt-btn {
+  padding: 8px 14px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.view-receipt-btn:hover {
+  background-color: var(--color-primary-strong);
+  transform: translateY(-1px);
+}
