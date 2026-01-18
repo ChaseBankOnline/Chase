@@ -140,6 +140,14 @@
         right.textContent = (tx.type === "expense" ? "-$" : "$") + (isNaN(amt) ? "0.00" : Number(amt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         li.appendChild(left);
         li.appendChild(right);
+        
+        const viewBtn = document.createElement("button");
+        viewBtn.textContent = "View Receipt";
+        viewBtn.style.marginLeft = "10px";
+        viewBtn.classList.add("view-receipt-btn");
+        viewBtn.addEventListener("click", () => showTransactionReceipt(tx));
+        li.appendChild(viewBtn);
+        
         transactionsList.insertBefore(li, transactionsList.firstChild);
       });
     }
@@ -261,9 +269,59 @@
         right.textContent = (type === "expense" ? "-$" : "$") + Number(amtValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         li.appendChild(left);
         li.appendChild(right);
+
+        const viewBtn = document.createElement("button");
+        viewBtn.textContent = "View Receipt";
+        viewBtn.style.marginLeft = "10px";
+        viewBtn.classList.add("view-receipt-btn");
+        viewBtn.addEventListener("click", () => showTransactionReceipt(txObj));
+        li.appendChild(viewBtn);
+        
+        transactionsList.insertBefore(li, transactionsList.firstChild);
         transactionsList.insertBefore(li, transactionsList.firstChild);
       }
     }
+
+  function showTransactionReceipt(tx) {
+  const successModal = $("success-modal");
+  if (!successModal) return;
+
+  // Show modal
+  successModal.style.display = "flex";
+
+  // Fill modal with transaction info
+  $("r-id").textContent = Math.floor(Math.random() * 1000000);
+  $("r-ref").textContent = "REF" + Math.floor(100000000 + Math.random() * 900000000);
+  const now = new Date();
+  $("r-date").textContent = now.toLocaleDateString();
+  $("r-time").textContent = now.toLocaleTimeString('en-US', { hour12: false });
+
+  // Fill transaction details
+  $("r-amount").textContent = parseAmount(tx.amount).toFixed(2);
+  $("r-fee").textContent = "0.00";
+
+  if (tx.type === "send") {
+    $("r-recipient").textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
+    $("r-name").textContent = tx.recipient || "[Name]";
+  } else if (tx.type === "pay") {
+    $("r-recipient").textContent = tx.text;
+    $("r-name").textContent = tx.text;
+  } else if (tx.type === "request") {
+    $("r-recipient").textContent = tx.recipient || "[Name]";
+    $("r-name").textContent = tx.recipient || "[Name]";
+  } else {
+    $("r-recipient").textContent = tx.text;
+    $("r-name").textContent = tx.text;
+  }
+
+  const modalHeading = successModal.querySelector("h2");
+  if (modalHeading) {
+    modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
+  }
+
+  // Store transaction globally for download button
+  window.lastTransactionDetails = tx;
+  }
 
     // ===== SEND MONEY =====
     if (sendForm) {
