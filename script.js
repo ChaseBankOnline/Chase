@@ -291,8 +291,8 @@
   successModal.style.display = "flex";
 
   // Fill modal with transaction info
-  $("r-id").textContent = Math.floor(Math.random() * 1000000);
-  $("r-ref").textContent = "REF" + Math.floor(100000000 + Math.random() * 900000000);
+  $("r-id").textContent = tx.id || Math.floor(Math.random() * 1000000);
+  $("r-ref").textContent = tx.ref || "REF" + Math.floor(100000000 + Math.random() * 900000000);
   const now = new Date();
   $("r-date").textContent = now.toLocaleDateString();
   $("r-time").textContent = now.toLocaleTimeString('en-US', { hour12: false });
