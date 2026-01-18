@@ -249,12 +249,20 @@
 
       // Prepend to savedTransactions as an object (keep original shape for demo)
       const txObj = {
-        type: type,
-        text: text,
-        amount: amtValue, // store numeric amount
-        date: new Date().toISOString().split('T')[0],
-        status: status
-      };
+      id: Math.floor(Math.random() * 1000000),
+      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+      type: "income", // or "expense" depending on logic
+      text: `Request from ${pendingTransaction.details.recipient}`,
+      amount: pendingTransaction.details.amount,
+      date: new Date().toISOString(),
+      status: "pending",
+      recipient: pendingTransaction.details.recipient || "",
+      account: pendingTransaction.details.account || "",
+      bank: pendingTransaction.details.bank || "",
+      note: pendingTransaction.details.note || ""
+    };
+      window.lastTransactionDetails = txObj;
+      
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
 
