@@ -284,7 +284,7 @@
         viewBtn.textContent = "View Receipt";
         viewBtn.style.marginLeft = "10px";
         viewBtn.classList.add("view-receipt-btn");
-        viewBtn.addEventListener("click", () => showTransactionReceipt(txObj));
+        viewBtn.addEventListener("click", () => showTransactionReceipt(tx));
         li.appendChild(viewBtn);
         
         transactionsList.insertBefore(li, transactionsList.firstChild);
