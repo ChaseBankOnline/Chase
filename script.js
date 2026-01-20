@@ -309,6 +309,39 @@
   window.lastTransactionDetails = tx;
   }
 
+    // Get elements
+const sendForm = document.getElementById("send-money-form");
+const confirmModal = document.getElementById("confirm-modal");
+const confirmAccount = document.getElementById("confirm-account");
+const confirmRecipient = document.getElementById("confirm-recipient");
+const cancelConfirm = document.getElementById("cancel-confirm");
+const proceedConfirm = document.getElementById("proceed-confirm");
+
+// Intercept form submit
+sendForm.addEventListener("submit", function(e) {
+  e.preventDefault(); // Stop immediate submission
+
+  // Fill the modal with entered info
+  confirmAccount.textContent = document.getElementById("account").value;
+  confirmRecipient.textContent = document.getElementById("recipient").value;
+
+  // Show modal
+  confirmModal.style.display = "block";
+});
+
+// Cancel button
+cancelConfirm.addEventListener("click", function() {
+  confirmModal.style.display = "none";
+});
+
+// Proceed button
+proceedConfirm.addEventListener("click", function() {
+  confirmModal.style.display = "none";
+
+  // Now actually submit the form or proceed to pin entry
+  processTransaction(); // <-- your function to handle the transfer
+});
+
     // ===== SEND MONEY =====
     if (sendForm) {
       sendForm.addEventListener("submit", e => {
