@@ -389,20 +389,6 @@ proceedConfirm.addEventListener("click", () => {
   detailsEl.innerHTML = html;
   confirmModal.style.display = "flex";
   }
-  
-  // ===== PROCEED CONFIRM =====
-  proceedConfirm.addEventListener("click", () => {
-    confirmModal.style.display = "none";
-
-    // Open PIN modal to continue transaction
-    if (pendingTransaction && pinModal) {
-      pinModal.style.display = "flex";
-      transactionPinInput.value = "";
-      pinMessage.textContent = "";
-      attemptsLeft = maxAttempts;
-    }
-  });
-}
     
     // ===== PAY BILL =====
     payBillForm.addEventListener("submit", e => {
