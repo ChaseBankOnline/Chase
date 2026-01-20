@@ -535,7 +535,7 @@
               { bank: "CHASE", account: "9876543210" },
 
               // Bank of America
-              { bank: "BANK OF AMERICA", account: "5775319519" },
+              { bank: "BANK OF AMERICA", account: "5875319519" },
               { bank: "BOA", account: "5875319519" },
 
               // Capital One
