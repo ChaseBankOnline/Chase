@@ -346,47 +346,47 @@ if (sendForm && confirmModal && confirmAccount && confirmRecipient && cancelConf
 }
 
     // ===== SEND MONEY =====
-    if (sendForm) {
-      sendForm.addEventListener("submit", e => {
-        e.preventDefault();
+    if (sendForm && confirmModal && confirmAccount && confirmRecipient && proceedConfirm && cancelConfirm) {
+    sendForm.addEventListener("submit", e => {
+    e.preventDefault(); // stop default submit
 
-        const bankEl = $("bank");
-        const accountEl = $("account");
-        const recipientEl = $("recipient");
-        const amountEl = $("amount");
-        const noteEl = $("note");
+    const bank = $("bank").value.trim();
+    const account = $("account").value.trim();
+    const recipient = $("recipient").value.trim();
+    const amount = parseAmount($("amount").value);
 
-        if (!bankEl || !accountEl || !recipientEl || !amountEl) return alert("Form is missing fields.");
+    if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) {
+      return alert("Fill all fields correctly.");
+  }
 
-        const bank = bankEl.value;
-        const account = accountEl.value.trim();
-        const recipient = recipientEl.value.trim();
-        const amount = parseAmount(amountEl.value);
-        const note = noteEl ? noteEl.value.trim() : "";
+    // Store pending transaction
+    pendingTransaction = {
+      action: "send",
+      details: { bank, account, recipient, amount }
+    };
 
-        if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
-        if (amount > totalBalance) return alert("Insufficient funds.");
+    // Show confirm modal first
+    confirmAccount.textContent = account;
+    confirmRecipient.textContent = recipient;
+    confirmModal.style.display = "block";
+  });
 
-        // Store pending transaction and open PIN modal. Use action "send" to match PIN handler
-        pendingTransaction = {
-          action: "send",
-          details: {
-            recipient: recipient,
-            account: account,
-            bank: bank,
-            amount: amount,
-            note: note
-          }
-        };
+  cancelConfirm.addEventListener("click", () => {
+    confirmModal.style.display = "none";
+    pendingTransaction = null;
+  });
 
-        if (pinModal) {
-          pinModal.style.display = "flex";
-          if (transactionPinInput) transactionPinInput.value = "";
-          if (pinMessage) pinMessage.textContent = "";
-          attemptsLeft = maxAttempts;
-        }
-      });
+  proceedConfirm.addEventListener("click", () => {
+    confirmModal.style.display = "none";
+    // Open PIN modal to continue transaction
+    if (pendingTransaction) {
+      if (pinModal) pinModal.style.display = "flex";
+      transactionPinInput.value = "";
+      pinMessage.textContent = "";
+      attemptsLeft = maxAttempts;
     }
+  });
+ }
 
     // ===== PAY BILL =====
     if (payBillForm) {
