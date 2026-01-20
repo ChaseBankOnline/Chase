@@ -10,6 +10,9 @@
     } catch (e) { return NaN; }
   };
 
+  // Normalize helper (used for bank/account comparisons)
+  const normalizeKey = (s) => (s || "").toString().replace(/[^0-9A-Z]/gi, "").toUpperCase();
+
   // Redirect to login if trying to access dashboard while not logged in
   if (window.location.pathname.endsWith("dashboard.html") && !localStorage.getItem("loggedIn")) {
     window.location.href = "index.html";
@@ -17,20 +20,26 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // ===== GLOBAL DEMO USER =====
-    let demoUser = JSON.parse(localStorage.getItem("demoUser"));
-    if (!demoUser) {
-      demoUser = {
+    // ===== DEMO USER (do NOT store secrets in localStorage) =====
+    // For demo purposes we keep non-sensitive profile in localStorage.
+    // Password and PIN are kept in-memory in this script only (not persisted).
+    let demoProfile = JSON.parse(localStorage.getItem("demoProfile"));
+    if (!demoProfile) {
+      demoProfile = {
         fullName: "Charles Williams",
         email: "Charlesweahh@gmail.com",
-        phone: "+1 510 367 1796",
-        password: "1346000",
-        transferPin: "1234",
-        emailNotif: true,
-        smsNotif: false
+        phone: "+1 510 367 1796"
       };
-      localStorage.setItem("demoUser", JSON.stringify(demoUser));
+      localStorage.setItem("demoProfile", JSON.stringify(demoProfile));
     }
+    // In-memory demo credentials (demo only — do not use in production)
+    const demoUser = {
+      ...demoProfile,
+      password: "1346000",   // demo-only, in-memory
+      transferPin: "1234",   // demo-only, in-memory
+      emailNotif: true,
+      smsNotif: false
+    };
 
     // ===== INITIAL TRANSACTIONS =====
     let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
@@ -41,6 +50,12 @@
       ];
       localStorage.setItem("transactions", JSON.stringify(savedTransactions));
     }
+
+    // Normalize loaded transaction amounts to numbers (avoid mixed types)
+    savedTransactions = savedTransactions.map(tx => {
+      const amt = parseAmount(tx.amount);
+      return { ...tx, amount: isNaN(amt) ? 0 : amt };
+    });
 
     // Helper: compute total balance from transactions (income - expense)
     function computeBalanceFromTransactions(transactions) {
@@ -57,7 +72,7 @@
 
     // Only set manual balance if nothing is stored yet
     if (isNaN(totalBalance)) {
-      // Starting balance manually for demo. In production you may compute from transactions.
+      // Starting balance manually for demo. In production compute from transactions or fetch from server.
       totalBalance = 1500450.50;
       localStorage.setItem("totalBalance", String(totalBalance));
     }
@@ -71,8 +86,8 @@
     if (loginForm) {
       loginForm.addEventListener("submit", e => {
         e.preventDefault();
-        const username = $("username").value.trim();
-        const password = $("password").value;
+        const username = ($("username") ? $("username").value : "").trim();
+        const password = ($("password") ? $("password").value : "");
 
         if (!username || !password) {
           if (messageEl) {
@@ -88,7 +103,7 @@
         }
 
         setTimeout(() => {
-          // Demo uses fullName as username (that's intentional in this demo)
+          // Demo uses fullName as username (intentional for demo). Keep check strict.
           if (username === demoUser.fullName && password === demoUser.password) {
             localStorage.setItem("loggedIn", "true");
             if (messageEl) {
@@ -140,18 +155,17 @@
         viewBtn.style.marginLeft = "10px";
         viewBtn.classList.add("view-receipt-btn");
 
-       // stop propagation so the document click handler doesn't immediately hide the modal
-       viewBtn.addEventListener("click", (e) => {
-         e.stopPropagation();
-         console.log("Transaction clicked:", tx); // <- debug line
-         showTransactionReceipt(tx);              // <- call your modal
-       });
+        // stop propagation so the document click handler doesn't immediately hide the modal
+        viewBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showTransactionReceipt(tx);
+        });
 
-       li.appendChild(viewBtn);
-       transactionsList.insertBefore(li, transactionsList.firstChild);
+        li.appendChild(viewBtn);
+        transactionsList.insertBefore(li, transactionsList.firstChild);
       });
-     }
-     renderTransactions();
+    }
+    renderTransactions();
 
     // ===== CHART =====
     try {
@@ -267,155 +281,199 @@
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
       renderTransactions();
+
+      // Update visible balance in UI if present
+      if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
+
+      // Save last transaction details without polluting window in production.
+      // For demo convenience we keep a window reference but it's optional.
       window.lastTransactionDetails = txObj;
       return txObj;
     }
 
-  function showTransactionReceipt(tx) {
-  const successModal = $("success-modal");
-  if (!successModal || !tx) return;
+    function showTransactionReceipt(tx) {
+      const successModal = $("success-modal");
+      if (!successModal || !tx) return;
 
-  // Show modal with proper styling
-  successModal.style.display = "flex";
-  successModal.style.position = "fixed";
-  successModal.style.top = "50%";
-  successModal.style.left = "50%";
-  successModal.style.transform = "translate(-50%, -50%)";
-  successModal.style.zIndex = 2000;
+      // Show modal with proper styling
+      successModal.style.display = "flex";
+      successModal.style.position = "fixed";
+      successModal.style.top = "50%";
+      successModal.style.left = "50%";
+      successModal.style.transform = "translate(-50%, -50%)";
+      successModal.style.zIndex = 2000;
 
-  // Fill modal with transaction info
-  const rid = $("r-id"); if (rid) rid.textContent = tx.id || Math.floor(Math.random() * 1000000);
-  const rref = $("r-ref"); if (rref) rref.textContent = tx.ref || "REF" + Math.floor(100000000 + Math.random() * 900000000);
-  const now = new Date(tx.date ? tx.date : Date.now());
-  const rdate = $("r-date"); if (rdate) rdate.textContent = now.toLocaleDateString();
-  const rtime = $("r-time"); if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+      // Fill modal with transaction info (guard each element)
+      const rid = $("r-id"); if (rid) rid.textContent = tx.id || Math.floor(Math.random() * 1000000);
+      const rref = $("r-ref"); if (rref) rref.textContent = tx.ref || "REF" + Math.floor(100000000 + Math.random() * 900000000);
+      const now = new Date(tx.date ? tx.date : Date.now());
+      const rdate = $("r-date"); if (rdate) rdate.textContent = now.toLocaleDateString();
+      const rtime = $("r-time"); if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
 
-  const ramount = $("r-amount"); if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
-  const rfee = $("r-fee"); if (rfee) rfee.textContent = "0.00";
+      const ramount = $("r-amount"); if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
+      const rfee = $("r-fee"); if (rfee) rfee.textContent = "0.00";
 
-  const rrecipient = $("r-recipient");
-  const rname = $("r-name");
-  if (tx.account || tx.bank) {
-    if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
-    if (rname) rname.textContent = tx.recipient || "[Name]";
-  } else {
-    if (rrecipient) rrecipient.textContent = tx.recipient || tx.text || "[Name]";
-    if (rname) rname.textContent = tx.recipient || tx.text || "[Name]";
-  }
+      const rrecipient = $("r-recipient");
+      const rname = $("r-name");
+      if (tx.account || tx.bank) {
+        if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
+        if (rname) rname.textContent = tx.recipient || "[Name]";
+      } else {
+        if (rrecipient) rrecipient.textContent = tx.recipient || tx.text || "[Name]";
+        if (rname) rname.textContent = tx.recipient || tx.text || "[Name]";
+      }
 
-  const modalHeading = successModal.querySelector("h2");
-  if (modalHeading) {
-    modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
-  }
+      const modalHeading = successModal.querySelector("h2");
+      if (modalHeading) {
+        modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
+      }
 
-  // Save globally for download
-  window.lastTransactionDetails = tx;
-  }
+      // Save globally for download (demo convenience)
+      window.lastTransactionDetails = tx;
+    }
 
-    // Get elements (DO NOT redeclare sendForm here — it's already declared above)
-const confirmModal = $("confirm-modal");
-const confirmAccount = $("confirm-account");
-const confirmRecipient = $("confirm-recipient");
-const cancelConfirm = $("cancel-confirm");
-const proceedConfirm = $("proceed-confirm");
+    // Get confirm modal elements (may be missing in some pages)
+    const confirmModal = $("confirm-modal");
+    const confirmAccount = $("confirm-account");
+    const confirmRecipient = $("confirm-recipient");
+    const cancelConfirm = $("cancel-confirm");
+    const proceedConfirm = $("proceed-confirm");
 
-if (sendForm && confirmModal && confirmAccount && confirmRecipient && cancelConfirm && proceedConfirm) {
+    // Safely wire send form and confirm modal handlers only if elements exist
+    if (sendForm && confirmModal && cancelConfirm && proceedConfirm) {
+      // ===== SEND MONEY SUBMIT =====
+      sendForm.addEventListener("submit", e => {
+        e.preventDefault();
 
-  // ===== SEND MONEY SUBMIT =====
-  sendForm.addEventListener("submit", e => {
-  e.preventDefault();
+        const bankEl = $("bank");
+        const accountEl = $("account");
+        const recipientEl = $("recipient");
+        const amountEl = $("amount");
+        const noteEl = $("note");
 
-  const bank = $("bank").value.trim();
-  const account = $("account").value.trim();
-  const recipient = $("recipient").value.trim();
-  const amount = parseAmount($("amount").value);
-  const note = $("note").value.trim();
+        const bank = bankEl ? bankEl.value.trim() : "";
+        const account = accountEl ? accountEl.value.trim() : "";
+        const recipient = recipientEl ? recipientEl.value.trim() : "";
+        const amount = parseAmount(amountEl ? amountEl.value : null);
+        const note = noteEl ? noteEl.value.trim() : "";
 
-  if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) {
-    return alert("Fill all fields correctly.");
-  }
+        if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) {
+          return alert("Fill all fields correctly.");
+        }
 
-  pendingTransaction = { action: "send", details: { bank, account, recipient, amount, note } };
-  populateConfirmModal(); // <- NEW
-});
-  
-  // ===== CANCEL CONFIRM =====
-cancelConfirm.addEventListener("click", () => {
-  confirmModal.style.display = "none";
-  pendingTransaction = null;
-});
+        pendingTransaction = { action: "send", details: { bank, account, recipient, amount, note } };
+        populateConfirmModal(); // show confirm modal
+      });
 
-// ===== PROCEED CONFIRM =====
-proceedConfirm.addEventListener("click", () => {
-  confirmModal.style.display = "none";
-  if (pendingTransaction && pinModal) {
-    pinModal.style.display = "flex";
-    transactionPinInput.value = "";
-    pinMessage.textContent = "";
-    attemptsLeft = maxAttempts;
-  }
-});
+      // ===== CANCEL CONFIRM =====
+      cancelConfirm.addEventListener("click", () => {
+        confirmModal.style.display = "none";
+        pendingTransaction = null;
+      });
 
-  function populateConfirmModal() {
-  if (!confirmModal || !pendingTransaction) return;
+      // ===== PROCEED CONFIRM =====
+      proceedConfirm.addEventListener("click", () => {
+        confirmModal.style.display = "none";
+        if (pendingTransaction && pinModal) {
+          pinModal.style.display = "flex";
+          if (transactionPinInput) transactionPinInput.value = "";
+          if (pinMessage) pinMessage.textContent = "";
+          attemptsLeft = maxAttempts;
+        }
+      });
 
-  const detailsEl = $("confirm-details"); // make sure this div exists in your confirm modal
-  let html = "";
+      function populateConfirmModal() {
+        if (!confirmModal || !pendingTransaction) return;
 
-  const { action, details } = pendingTransaction;
+        const detailsEl = $("confirm-details"); // ensure this div exists in confirm modal
+        if (!detailsEl) return; // guard
 
-  if (action === "send") {
-    html = `
-      <p><strong>Recipient:</strong> ${details.recipient}</p>
-      <p><strong>Account Number:</strong> ${details.account}</p>
-      <p><strong>Bank:</strong> ${details.bank}</p>
-      <p><strong>Amount:</strong> $${Number(details.amount).toLocaleString()}</p>
-      ${details.note ? `<p><strong>Note:</strong> ${details.note}</p>` : ""}
-    `;
-  } else if (action === "pay") {
-    html = `
-      <p><strong>Biller:</strong> ${details.billText}</p>
-      <p><strong>Amount:</strong> $${Number(details.billAmount).toLocaleString()}</p>
-      ${details.note ? `<p><strong>Note:</strong> ${details.note}</p>` : ""}
-    `;
-  } else if (action === "request") {
-    html = `
-      <p><strong>Request From:</strong> ${details.recipient}</p>
-      <p><strong>Amount:</strong> $${Number(details.amount).toLocaleString()}</p>
-      ${details.note ? `<p><strong>Note:</strong> ${details.note}</p>` : ""}
-    `;
-  }
+        // clear previous content safely
+        detailsEl.textContent = "";
 
-  detailsEl.innerHTML = html;
-  confirmModal.style.display = "flex";
-  }
-    
+        const { action, details } = pendingTransaction;
+
+        function addRow(label, value) {
+          const p = document.createElement('p');
+          const strong = document.createElement('strong');
+          strong.textContent = label;
+          p.appendChild(strong);
+          p.appendChild(document.createTextNode(' ' + (value ?? '')));
+          detailsEl.appendChild(p);
+        }
+
+        if (action === "send") {
+          addRow('Recipient:', details.recipient);
+          addRow('Account Number:', details.account);
+          addRow('Bank:', details.bank);
+          addRow('Amount:', `$${Number(details.amount).toLocaleString()}`);
+          if (details.note) addRow('Note:', details.note);
+        } else if (action === "pay") {
+          addRow('Biller:', details.billText);
+          addRow('Amount:', `$${Number(details.billAmount).toLocaleString()}`);
+          if (details.note) addRow('Note:', details.note);
+        } else if (action === "request") {
+          addRow('Request From:', details.recipient);
+          addRow('Amount:', `$${Number(details.amount).toLocaleString()}`);
+          if (details.note) addRow('Note:', details.note);
+        }
+
+        confirmModal.style.display = "flex";
+      }
+    }
+
     // ===== PAY BILL =====
-    payBillForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const billText = $("biller").value.trim();
-  const billAmount = parseAmount($("bill-amount").value);
-  const note = $("bill-note") ? $("bill-note").value.trim() : "";
+    if (payBillForm) {
+      payBillForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const billerEl = $("biller");
+        const billAmountEl = $("bill-amount");
+        const billNoteEl = $("bill-note");
 
-  if (!billText || isNaN(billAmount) || billAmount <= 0) return alert("Fill all fields correctly.");
-  if (billAmount > totalBalance) return alert("Insufficient funds.");
+        const billText = billerEl ? billerEl.value.trim() : "";
+        const billAmount = parseAmount(billAmountEl ? billAmountEl.value : null);
+        const note = billNoteEl ? billNoteEl.value.trim() : "";
 
-  pendingTransaction = { action: "pay", details: { billText, billAmount, note } };
-  populateConfirmModal(); // <- SHOW CONFIRM MODAL
-});
+        if (!billText || isNaN(billAmount) || billAmount <= 0) return alert("Fill all fields correctly.");
+        if (billAmount > totalBalance) return alert("Insufficient funds.");
+
+        pendingTransaction = { action: "pay", details: { billText, billAmount, note } };
+        // Use populateConfirmModal if confirm modal exists
+        if ($("confirm-modal")) populateConfirmModal();
+        else {
+          // fallback to immediate pin modal flow
+          if (pinModal) {
+            pinModal.style.display = "flex";
+            attemptsLeft = maxAttempts;
+          }
+        }
+      });
+    }
 
     // ===== REQUEST MONEY =====
-    requestMoneyForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const recipient = $("request-recipient").value.trim();
-  const amount = parseAmount($("request-amount").value);
-  const note = $("request-note") ? $("request-note").value.trim() : "";
+    if (requestMoneyForm) {
+      requestMoneyForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const recipientEl = $("request-recipient");
+        const amountEl = $("request-amount");
+        const noteEl = $("request-note");
 
-  if (!recipient || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
+        const recipient = recipientEl ? recipientEl.value.trim() : "";
+        const amount = parseAmount(amountEl ? amountEl.value : null);
+        const note = noteEl ? noteEl.value.trim() : "";
 
-  pendingTransaction = { action: "request", details: { recipient, amount, note } };
-  populateConfirmModal(); // <- SHOW CONFIRM MODAL
-});
+        if (!recipient || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
+
+        pendingTransaction = { action: "request", details: { recipient, amount, note } };
+        if ($("confirm-modal")) populateConfirmModal();
+        else {
+          if (pinModal) {
+            pinModal.style.display = "flex";
+            attemptsLeft = maxAttempts;
+          }
+        }
+      });
+    }
 
     // ===== PIN CONFIRM =====
     if (confirmPinBtn) {
@@ -448,7 +506,7 @@ proceedConfirm.addEventListener("click", () => {
         const { action, details } = pendingTransaction;
 
         // Normalize bank & account before validation — do it safely (handle undefined)
-        details.bank = (details.bank || "").trim().toUpperCase();
+        details.bank = (details.bank || "").trim();
         details.account = (details.account || "").trim();
 
         // Determine target button for processing animation
@@ -470,52 +528,60 @@ proceedConfirm.addEventListener("click", () => {
           setTimeout(() => {
             clearInterval(loader);
 
-          // ===== ALLOWED ACCOUNTS (ONLY THESE CAN SUCCEED) =====
-          const allowedAccounts = [
-          // Chase Bank
-          { bank: "CHASE BANK", account: "9876543210" },
-          { bank: "CHASE", account: "9876543210" },
+            // ===== ALLOWED ACCOUNTS (ONLY THESE CAN SUCCEED) =====
+            const allowedAccounts = [
+              // Chase Bank
+              { bank: "CHASE BANK", account: "9876543210" },
+              { bank: "CHASE", account: "9876543210" },
 
-          // Bank of America
-          { bank: "BANK OF AMERICA", account: "5775319519" },
-          { bank: "BOA", account: "5875319519" },
+              // Bank of America
+              { bank: "BANK OF AMERICA", account: "5775319519" },
+              { bank: "BOA", account: "5875319519" },
 
-          // Capital One
-          { bank: "CAPITAL ONE", account: "3095361077" },
-          { bank: "CAPONE", account: "3095361077" }
-        ];
+              // Capital One
+              { bank: "CAPITAL ONE", account: "3095361077" },
+              { bank: "CAPONE", account: "3095361077" }
+            ];
 
-          // Check if current transfer is allowed
-          const isAllowedAccount =
-          action === "send" &&
-          allowedAccounts.some(a =>
-          a.bank === details.bank &&
-          a.account === details.account
-         );
+            // Normalize details for comparison
+            const normalizedDetailsBank = normalizeKey(details.bank);
+            const normalizedDetailsAccount = normalizeKey(details.account);
+
+            const isAllowedAccount =
+              action === "send" &&
+              allowedAccounts.some(a =>
+                normalizeKey(a.bank) === normalizedDetailsBank &&
+                normalizeKey(a.account) === normalizedDetailsAccount
+              );
 
             // ===== SPECIAL CASE: Wells Fargo GOES TO ERROR PAGE =====
-            if (action === "send" && details.bank === "WEF" && details.account === "15623948807") {
+            // Fix typo "WEF" -> use normalized check for "WELLS" or "WELLSFARGO"
+            const isWellsSpecial = action === "send" &&
+              (normalizedDetailsBank.includes("WELLS") || normalizedDetailsBank.includes("WELLSFARGO")) &&
+              normalizedDetailsAccount === normalizeKey("15623948807");
+
+            if (isWellsSpecial) {
               if (sendForm) sendForm.reset();
               if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
               targetBtn.disabled = false;
-              window.location.href = "error.html";
               pendingTransaction = null;
               resetPinState();
+              window.location.href = "error.html";
               return;
             }
 
             // ===== BLOCK ALL OTHER RANDOM ACCOUNTS =====
             if (action === "send" && !isAllowedAccount) {
-            if (sendForm) sendForm.reset();
-            if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
-            targetBtn.disabled = false;
-            window.location.href = "error.html";
-            pendingTransaction = null;
-            resetPinState();
-            return;
-           }
+              if (sendForm) sendForm.reset();
+              if (toggleTransferBtn) toggleTransferBtn.textContent = "Transfer Funds";
+              targetBtn.disabled = false;
+              pendingTransaction = null;
+              resetPinState();
+              window.location.href = "error.html";
+              return;
+            }
 
-             // ===== PERFORM TRANSACTION =====
+            // ===== PERFORM TRANSACTION =====
             let createdTx = null;
             if (action === "send") {
               const { bank, recipient, amount, note } = details;
@@ -559,7 +625,7 @@ proceedConfirm.addEventListener("click", () => {
               };
               savedTransactions.unshift(txObj);
               saveTransactionsAndBalance();
-              if (transactionsList) renderTransactions();
+              renderTransactions();
               if (requestMoneyForm) requestMoneyForm.reset();
               createdTx = txObj;
             }
@@ -792,9 +858,9 @@ proceedConfirm.addEventListener("click", () => {
       const passwordMessage = $("password-message");
       passwordForm.addEventListener("submit", e => {
         e.preventDefault();
-        const current = $("currentPassword").value;
-        const newP = $("newPassword").value;
-        const confirmP = $("confirmPassword").value;
+        const current = $("currentPassword") ? $("currentPassword").value : "";
+        const newP = $("newPassword") ? $("newPassword").value : "";
+        const confirmP = $("confirmPassword") ? $("confirmPassword").value : "";
 
         if (current !== demoUser.password) {
           if (passwordMessage) { passwordMessage.textContent = "Current password is incorrect!"; passwordMessage.classList.remove("success"); passwordMessage.classList.add("error"); }
@@ -811,8 +877,8 @@ proceedConfirm.addEventListener("click", () => {
           return;
         }
 
+        // Update in-memory demo credential only (do not persist secrets)
         demoUser.password = newP;
-        localStorage.setItem("demoUser", JSON.stringify(demoUser));
         if (passwordMessage) { passwordMessage.textContent = "Password successfully updated ✔"; passwordMessage.classList.remove("error"); passwordMessage.classList.add("success"); }
         passwordForm.reset();
       });
