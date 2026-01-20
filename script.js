@@ -323,35 +323,73 @@ if (sendForm && confirmModal && confirmAccount && confirmRecipient && cancelConf
 
   // ===== SEND MONEY SUBMIT =====
   sendForm.addEventListener("submit", e => {
-    e.preventDefault(); // Stop default submission
+  e.preventDefault();
 
-    const bank = $("bank").value.trim();
-    const account = $("account").value.trim();
-    const recipient = $("recipient").value.trim();
-    const amount = parseAmount($("amount").value);
+  const bank = $("bank").value.trim();
+  const account = $("account").value.trim();
+  const recipient = $("recipient").value.trim();
+  const amount = parseAmount($("amount").value);
+  const note = $("note").value.trim();
 
-    if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) {
-      return alert("Fill all fields correctly.");
-    }
+  if (!bank || !account || !recipient || isNaN(amount) || amount <= 0) {
+    return alert("Fill all fields correctly.");
+  }
 
-    // Store pending transaction
-    pendingTransaction = {
-      action: "send",
-      details: { bank, account, recipient, amount }
-    };
-
-    // Show confirm modal first
-    confirmAccount.textContent = account;
-    confirmRecipient.textContent = recipient;
-    confirmModal.style.display = "block";
-  });
-
+  pendingTransaction = { action: "send", details: { bank, account, recipient, amount, note } };
+  populateConfirmModal(); // <- NEW
+});
+  
   // ===== CANCEL CONFIRM =====
-  cancelConfirm.addEventListener("click", () => {
-    confirmModal.style.display = "none";
-    pendingTransaction = null;
-  });
+cancelConfirm.addEventListener("click", () => {
+  confirmModal.style.display = "none";
+  pendingTransaction = null;
+});
 
+// ===== PROCEED CONFIRM =====
+proceedConfirm.addEventListener("click", () => {
+  confirmModal.style.display = "none";
+  if (pendingTransaction && pinModal) {
+    pinModal.style.display = "flex";
+    transactionPinInput.value = "";
+    pinMessage.textContent = "";
+    attemptsLeft = maxAttempts;
+  }
+});
+
+  function populateConfirmModal() {
+  if (!confirmModal || !pendingTransaction) return;
+
+  const detailsEl = $("confirm-details"); // make sure this div exists in your confirm modal
+  let html = "";
+
+  const { action, details } = pendingTransaction;
+
+  if (action === "send") {
+    html = `
+      <p><strong>Recipient:</strong> ${details.recipient}</p>
+      <p><strong>Account Number:</strong> ${details.account}</p>
+      <p><strong>Bank:</strong> ${details.bank}</p>
+      <p><strong>Amount:</strong> $${Number(details.amount).toLocaleString()}</p>
+      ${details.note ? `<p><strong>Note:</strong> ${details.note}</p>` : ""}
+    `;
+  } else if (action === "pay") {
+    html = `
+      <p><strong>Biller:</strong> ${details.billText}</p>
+      <p><strong>Amount:</strong> $${Number(details.billAmount).toLocaleString()}</p>
+      ${details.note ? `<p><strong>Note:</strong> ${details.note}</p>` : ""}
+    `;
+  } else if (action === "request") {
+    html = `
+      <p><strong>Request From:</strong> ${details.recipient}</p>
+      <p><strong>Amount:</strong> $${Number(details.amount).toLocaleString()}</p>
+      ${details.note ? `<p><strong>Note:</strong> ${details.note}</p>` : ""}
+    `;
+  }
+
+  detailsEl.innerHTML = html;
+  confirmModal.style.display = "flex";
+  }
+  
   // ===== PROCEED CONFIRM =====
   proceedConfirm.addEventListener("click", () => {
     confirmModal.style.display = "none";
@@ -367,47 +405,31 @@ if (sendForm && confirmModal && confirmAccount && confirmRecipient && cancelConf
 }
     
     // ===== PAY BILL =====
-    if (payBillForm) {
-      payBillForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const billerEl = $("biller");
-        const billAmountEl = $("bill-amount");
-        if (!billerEl || !billAmountEl) return alert("Form missing fields.");
-        const billText = billerEl.value.trim();
-        const billAmount = parseAmount(billAmountEl.value);
-        if (!billText || isNaN(billAmount) || billAmount <= 0) return alert("Fill all fields correctly.");
-        if (billAmount > totalBalance) return alert("Insufficient funds.");
+    payBillForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const billText = $("biller").value.trim();
+  const billAmount = parseAmount($("bill-amount").value);
+  const note = $("bill-note") ? $("bill-note").value.trim() : "";
 
-        pendingTransaction = { action: "pay", details: { billText, billAmount } };
-        if (pinModal) {
-          pinModal.style.display = "flex";
-          if (transactionPinInput) transactionPinInput.value = "";
-          if (pinMessage) pinMessage.textContent = "";
-          attemptsLeft = maxAttempts;
-        }
-      });
-    }
+  if (!billText || isNaN(billAmount) || billAmount <= 0) return alert("Fill all fields correctly.");
+  if (billAmount > totalBalance) return alert("Insufficient funds.");
+
+  pendingTransaction = { action: "pay", details: { billText, billAmount, note } };
+  populateConfirmModal(); // <- SHOW CONFIRM MODAL
+});
 
     // ===== REQUEST MONEY =====
-    if (requestMoneyForm) {
-      requestMoneyForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const recipientEl = $("request-recipient");
-        const amountEl = $("request-amount");
-        if (!recipientEl || !amountEl) return alert("Form missing fields.");
-        const recipient = recipientEl.value.trim();
-        const amount = parseAmount(amountEl.value);
-        if (!recipient || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
+    requestMoneyForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const recipient = $("request-recipient").value.trim();
+  const amount = parseAmount($("request-amount").value);
+  const note = $("request-note") ? $("request-note").value.trim() : "";
 
-        pendingTransaction = { action: "request", details: { recipient, amount } };
-        if (pinModal) {
-          pinModal.style.display = "flex";
-          if (transactionPinInput) transactionPinInput.value = "";
-          if (pinMessage) pinMessage.textContent = "";
-          attemptsLeft = maxAttempts;
-        }
-      });
-    }
+  if (!recipient || isNaN(amount) || amount <= 0) return alert("Fill all fields correctly.");
+
+  pendingTransaction = { action: "request", details: { recipient, amount, note } };
+  populateConfirmModal(); // <- SHOW CONFIRM MODAL
+});
 
     // ===== PIN CONFIRM =====
     if (confirmPinBtn) {
