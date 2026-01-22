@@ -1,8 +1,7 @@
-/* ===================================
-   CORE VARIABLES & THEME
-   =================================== */
+/* =========================
+   CORE TOKENS
+   ========================= */
 :root {
-  /* Colors */
   --color-bg: #f5f7fa;
   --color-surface: #ffffff;
   --color-primary: #005eb8;
@@ -12,27 +11,22 @@
   --color-success: #1a9a3a;
   --color-danger: #d94545;
 
-  /* Radius */
   --radius-sm: 8px;
   --radius-md: 14px;
-
-  /* Shadows */
   --shadow-lg: 0 12px 28px rgba(0,0,0,0.12);
   --shadow-sm: 0 5px 15px rgba(0,0,0,0.06);
 
-  /* Spacing */
   --space-xs: 8px;
   --space-sm: 12px;
   --space-md: 20px;
   --space-lg: 30px;
-
-  /* Layout */
   --container-width: 360px;
   --breakpoint-md: 950px;
-  --breakpoint-sm: 600px;
+  --breakpoint-sm: 400px;
 }
 
-[data-theme="dark"], @media (prefers-color-scheme: dark) {
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
   :root {
     --color-bg: #0f1720;
     --color-surface: #0b1220;
@@ -42,36 +36,38 @@
     --shadow-sm: 0 4px 10px rgba(0,0,0,0.5);
   }
 }
+[data-theme="dark"] {
+  --color-bg: #0f1720;
+  --color-surface: #0b1220;
+  --color-text: #e6eef8;
+  --color-muted: #9aa6b2;
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.6);
+  --shadow-sm: 0 4px 10px rgba(0,0,0,0.5);
+}
 
+/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
 
-/* ===================================
-   RESET & BODY
-   =================================== */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* =========================
+   RESET & GLOBAL
+   ========================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
   background: var(--color-bg);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--color-text);
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
 
+/* Links */
 a { text-decoration: none; color: var(--color-primary); }
 a:hover { text-decoration: underline; }
 
+/* Focus */
 :focus { outline: none; }
 :focus-visible {
   outline: 3px solid color-mix(in srgb, var(--color-primary) 50%, white);
@@ -79,18 +75,18 @@ a:hover { text-decoration: underline; }
   border-radius: calc(var(--radius-sm) + 2px);
 }
 
-/* ===================================
+/* =========================
    CONTAINERS
-   =================================== */
+   ========================= */
 .container-center {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-lg);
 }
 
-/* ===================================
+/* =========================
    NAVBAR
-   =================================== */
+   ========================= */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -112,7 +108,6 @@ a:hover { text-decoration: underline; }
   gap: 10px;
   cursor: pointer;
 }
-
 .navbar .avatar {
   width: 42px;
   height: 42px;
@@ -120,75 +115,45 @@ a:hover { text-decoration: underline; }
   object-fit: cover;
 }
 
-/* ===================================
-   DASHBOARD LAYOUT
-   =================================== */
-.dashboard-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 25px;
-  justify-content: center;
-  padding: 30px;
-}
-
-/* ===================================
-   CARDS
-   =================================== */
-.card {
+/* =========================
+   LOGIN CARD
+   ========================= */
+.login-card {
+  width: var(--container-width);
+  margin: 50px auto;
+  text-align: center;
+  padding: 44px 36px;
   background: var(--color-surface);
   border-radius: var(--radius-md);
-  padding: var(--space-md);
   box-shadow: var(--shadow-lg);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-}
+.login-card h1 { color: var(--color-primary); font-size: 28px; margin-bottom: 10px; }
+.login-card p { font-size: 14px; margin-bottom: 20px; color: var(--color-muted); }
+.login-card small { font-size: 12px; color: var(--color-muted); }
 
-/* BALANCE CARD */
-.balance-card .balance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-sm);
-}
-
-.balance-card .balance {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: var(--space-sm);
-}
-
-/* MINI CARDS */
-.mini-cards {
-  display: flex;
-  gap: 12px;
-  margin-top: 15px;
-}
-
-.mini-card {
-  background: color-mix(in srgb, var(--color-surface) 96%, black 0%);
+/* Inputs */
+.input, .login-card input, .send-money-card input, input, select {
+  width: 100%;
   padding: 12px;
+  margin-bottom: 16px;
   border-radius: var(--radius-sm);
-  width: 48%;
-  text-align: center;
-  transition: background 0.2s;
+  border: 1px solid rgba(0,0,0,0.12);
+  font-size: 14px;
+  background: #f9fafb;
+  color: var(--color-text);
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
-.mini-card:hover {
-  background: color-mix(in srgb, var(--color-surface) 90%, black 0%);
+.input:focus, .login-card input:focus, .send-money-card input:focus, input:focus, select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(0,94,184,0.1);
+  outline: none;
 }
 
-.mini-card h4 { font-size: 14px; color: var(--color-muted); margin-bottom: 6px; }
-.mini-card p { font-size: 16px; font-weight: 700; color: var(--color-primary); }
-.mini-card small { font-size: 12px; color: var(--color-muted); }
-
-/* ===================================
+/* =========================
    BUTTONS
-   =================================== */
+   ========================= */
 .button, .quick-btn, #send-money-form button, .pay-bill-card button, .request-money-card button {
   display: inline-flex;
   align-items: center;
@@ -202,61 +167,85 @@ a:hover { text-decoration: underline; }
   color: #fff;
   transition: background 0.2s, transform 0.1s;
 }
-
 .button:hover, .quick-btn:hover, #send-money-form button:hover {
   background: var(--color-primary-strong);
   transform: translateY(-1px);
 }
-
-.button.secondary {
-  background: #f4f6f8;
-  color: var(--color-primary);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
+.button.secondary { background: #f4f6f8; color: var(--color-primary); border: 1px solid rgba(0,0,0,0.06); }
 .button.secondary:hover { background: #e8f0fe; }
 
-/* ===================================
-   FORMS & INPUTS
-   =================================== */
-input, select, .input {
-  width: 100%;
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(0,0,0,0.12);
-  font-size: 14px;
-  background: #f9fafb;
-  color: var(--color-text);
-  transition: border 0.2s, box-shadow 0.2s;
+/* =========================
+   DASHBOARD CONTAINER
+   ========================= */
+.dashboard-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
+  padding: 30px;
 }
 
-input:focus, select:focus, .input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(0,94,184,0.1);
-  outline: none;
+/* Cards */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* TRANSACTIONS LIST */
-.transactions-card ul { list-style: none; }
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
 
-.transactions-card li {
+/* Balance Card */
+.balance-card .balance-header {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+.balance-card .balance {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-sm);
 }
 
+/* Mini Cards */
+.mini-cards { display: flex; gap: 12px; margin-top: 15px; }
+.mini-card {
+  background: color-mix(in srgb, var(--color-surface) 96%, black 0%);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  width: 48%;
+  text-align: center;
+  transition: background 0.2s;
+}
+.mini-card:hover { background: color-mix(in srgb, var(--color-surface) 90%, black 0%); }
+.mini-card h4 { font-size: 14px; color: var(--color-muted); margin-bottom: 6px; }
+.mini-card p { font-size: 16px; font-weight: 700; color: var(--color-primary); }
+.mini-card small { font-size: 12px; color: var(--color-muted); }
+
+/* Transactions */
+.transactions-card ul { list-style: none; }
+.transactions-card li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .transactions-card li.income span:last-child { color: var(--color-success); }
 .transactions-card li.expense span:last-child { color: var(--color-danger); }
 
-/* QUICK ACTIONS */
-.quick-actions-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+/* Quick Actions */
+.quick-actions-buttons { display: flex; flex-direction: column; gap: 12px; }
 
-/* CHART CARD */
+/* Send Money Card */
+.send-money-card form { display: flex; flex-direction: column; gap: 15px; }
+.send-money-card label { font-weight: 600; margin-bottom: 5px; }
+.send-money-card input, .send-money-card select { padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; transition: border 0.2s; }
+.send-money-card input:focus, .send-money-card select:focus { border-color: #4bc0c0; outline: none; }
+.send-money-card button { width: 100%; padding: 12px; background-color: #4bc0c0; color: #fff; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+.send-money-card button:hover { background-color: #36a5a5; }
+
+/* Spending Trends Card */
 .spending-trends-card {
   width: 100%;
   max-width: 800px;
@@ -265,67 +254,46 @@ input:focus, select:focus, .input:focus {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
+  height: 320px;
 }
+.spending-trends-card canvas { width: 100% !important; height: 100% !important; }
 
-.spending-trends-card canvas {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* PROFILE PANEL */
+/* Profile Panel */
 #profile-panel {
   display: none;
   position: fixed;
   top: 60px;
   right: 20px;
   width: 280px;
-  background: var(--color-surface);
+  background: #fff;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   border-radius: 12px;
   z-index: 1001;
   transition: all 0.3s ease;
 }
-
-#profile-panel .profile-header {
-  text-align: center;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-#profile-panel .avatar-large {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
-#profile-panel .profile-header h3 { font-size: 16px; color: #333; margin: 5px 0; }
+#profile-panel .profile-header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+#profile-panel .avatar-large { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; }
+#profile-panel .profile-header h3 { margin: 5px 0; font-size: 16px; color: #333; }
 #profile-panel .profile-header p { font-size: 13px; color: #777; }
-
-#profile-panel .profile-actions {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 15px;
-}
-
+#profile-panel .profile-actions { display: flex; flex-direction: column; padding: 10px 15px; }
 #profile-panel .profile-actions button {
   margin: 5px 0;
   padding: 10px;
   border: none;
+  background: #007bff;
+  color: #fff;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
   transition: background 0.2s;
 }
-
-#profile-panel .profile-actions button:hover { opacity: 0.85; }
-#profile-panel .profile-actions #close-profile {
-  background: #ccc; color: #333;
-}
+#profile-panel .profile-actions button:hover { background: #0056b3; }
+#profile-panel .profile-actions #close-profile { background: #ccc; color: #333; }
 #profile-panel .profile-actions #close-profile:hover { background: #999; }
 
-/* MODALS */
+/* =========================
+   MODALS
+   ========================= */
 #success-modal, #confirm-modal {
   display: none;
   position: fixed;
@@ -334,10 +302,7 @@ input:focus, select:focus, .input:focus {
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 15px;
-  overflow-y: auto;
 }
-
 .modal-content {
   background: var(--color-surface);
   border-radius: var(--radius-md);
@@ -347,28 +312,35 @@ input:focus, select:focus, .input:focus {
   box-shadow: var(--shadow-lg);
   text-align: center;
 }
-
 .modal-content h2 { margin-bottom: 15px; color: var(--color-text); }
 
-/* FOOTER */
-.login-footer {
-  text-align: center;
-  margin-top: 50px;
-  font-size: 13px;
-  color: var(--color-muted);
-}
+/* Confirm Modal Buttons */
+#confirm-modal .modal-actions { display: flex; justify-content: center; gap: 12px; margin-top: 15px; }
+#confirm-modal .btn-cancel { background: #e5e7eb; color: #111827; border-radius: 8px; padding: 10px 20px; font-weight: 600; }
+#confirm-modal .btn-cancel:hover { background: #d1d5db; }
+#confirm-modal .btn-confirm { background: var(--color-primary); color: #fff; border-radius: 8px; padding: 10px 20px; font-weight: 600; }
+#confirm-modal .btn-confirm:hover { background: var(--color-primary-strong); }
+
+/* =========================
+   FOOTER
+   ========================= */
+.login-footer { text-align: center; margin-top: 50px; font-size: 13px; color: var(--color-muted); }
 .login-footer a { color: var(--color-muted); }
 .login-footer a:hover { color: var(--color-primary); }
 
-/* ===================================
+/* =========================
    RESPONSIVE
-   =================================== */
-@media (max-width: 950px) {
-  .dashboard-container { flex-direction: column; align-items: center; }
-}
-
+   ========================= */
+@media (max-width: 950px) { .dashboard-container { flex-direction: column; align-items: center; } }
 @media (max-width: 600px) {
   .dashboard-container { padding: 20px; gap: 20px; }
-  .card, .mini-card { width: 100%; }
+  .card { width: 100%; }
   .mini-cards { flex-direction: column; }
+  .mini-card { width: 100%; }
+  .login-card { width: calc(100% - 32px); padding: 30px 20px; }
+  .info-page { margin: 40px 15px; padding: 25px; }
+  .info-page h1 { font-size: 22px; }
 }
+@media (min-width: 600px) { .login-card { padding: 44px 36px; } }
+@media (min-width: 800px) { .dashboard-container { padding: 36px; gap: 28px; } }
+@media (min-width: 950px) { .dashboard-container { flex-direction: row; align-items: flex-start; } }
