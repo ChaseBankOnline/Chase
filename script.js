@@ -110,11 +110,14 @@
       }, 0);
     }
 
-    // Initialize totalBalance from accounts to avoid drift
-    totalBalance = computeTotalFromAccounts(accounts);
-    // persist up-to-date data
-    localStorage.setItem("accounts", JSON.stringify(accounts));
+    // Make sure totalBalance exists in storage
+    if (isNaN(totalBalance)) {
+    totalBalance = 1700450.50;
     localStorage.setItem("totalBalance", String(totalBalance));
+   }
+
+    // persist accounts as is
+    localStorage.setItem("accounts", JSON.stringify(accounts));
 
     // Display both balances if elements exist
     function updateBalancesUI() {
