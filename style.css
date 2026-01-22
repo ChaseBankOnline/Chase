@@ -816,3 +816,22 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.25); /* subtle professional border */
 }
+
+/* Transfer Funds button styling (professional blue) */
+#toggle-transfer-btn {
+  background-color: var(--color-primary); /* uses your existing primary blue */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#toggle-transfer-btn:hover {
+  background-color: var(--color-primary-strong); /* darker blue on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
