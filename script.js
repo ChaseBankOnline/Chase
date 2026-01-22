@@ -85,7 +85,7 @@
     if (!accounts || typeof accounts !== "object") {
       if (isNaN(totalBalance)) {
         // Starting balance manually for demo
-        totalBalance = 1500450.50;
+        totalBalance = 1750450.50;
       }
       // Initialize accounts: primary checking account and optional others
       accounts = {
