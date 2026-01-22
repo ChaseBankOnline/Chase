@@ -46,7 +46,7 @@
     if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
       savedTransactions = [
         { type: "expense", text: "Netflix — Entertainment", amount: "$150.00", date: "2026-01-05", recipient: "Netflix", account: "Charlesweahh@gmail.com", bank: "Charles", note: "" },
-        { type: "income", text: "Interior — Blessed", amount: "$69,000.00", date: "2026-01-09", recipient: "Company Inc.", account: "28064922651", bank: "BOA", note: "" }
+        { type: "expense", text: "Interior — Blessed", amount: "$69,000.00", date: "2026-01-09", recipient: "Company Inc.", account: "28064922651", bank: "BOA", note: "" }
       ];
       localStorage.setItem("transactions", JSON.stringify(savedTransactions));
     }
