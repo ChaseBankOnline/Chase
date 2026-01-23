@@ -54,47 +54,84 @@ function handleViewReceiptClicks() {
 
       const modal = document.getElementById("receipt-modal");
 
-      modal.querySelector("#r-date").textContent = tx.date;
-      modal.querySelector("#r-desc").textContent = tx.desc;
-      modal.querySelector("#r-amount").textContent = tx.amount;
-      modal.querySelector("#r-status").textContent = tx.status;
-      modal.querySelector("#r-recipient-name").textContent = tx.recipientName;
-      modal.querySelector("#r-recipient-account").textContent = tx.recipientAccount;
-      modal.querySelector("#r-recipient-bank").textContent = tx.recipientBank;
+      // Fill modal with dashboard-style receipt info
+      modal.innerHTML = `
+        <div style="background:#fff; padding:20px; width:350px; margin:auto; position:relative;">
+          <span id="close-receipt" style="position:absolute; top:10px; right:10px; cursor:pointer;">&times;</span>
+          <h2>Transaction Successful ✔</h2>
+
+          <p><strong>Transaction ID:</strong> TX-${Math.floor(Math.random()*1000000)}</p>
+          <p><strong>Reference Number:</strong> REF-${Math.floor(Math.random()*1000000)}</p>
+          <p><strong>Payment Date:</strong> ${tx.date}</p>
+          <p><strong>Time‑Stamp:</strong> ${new Date().toLocaleTimeString()}</p>
+
+          <hr>
+
+          <h3>Transfer Details</h3>
+          <p><strong>Payment Amount:</strong> ${tx.amount}</p>
+          <p><strong>Transaction Fee:</strong> $0.00</p>
+
+          <hr>
+
+          <h3>Account Information</h3>
+          <p><strong>From Account:</strong> JPMorgan Chase Bank, N.A. (****8433)</p>
+          <p><strong>To Account:</strong> ${tx.recipientAccount}</p>
+          <p><strong>Recipient Name:</strong> ${tx.recipientName}</p>
+          <p><strong>Recipient Bank:</strong> ${tx.recipientBank}</p>
+
+          <hr>
+
+          <h3>Authorization Statement</h3>
+          <p>
+            I hereby confirm that I have authorized an electronic debit from my payment account in the amount stated above.
+            This transaction was approved by the account holder and processed in accordance with applicable banking regulations.
+          </p>
+
+          <hr>
+
+          <p><strong>Transaction Status:</strong> ${tx.status}</p>
+
+          <hr>
+
+          <small>This receipt was generated electronically.</small>
+
+          <div class="receipt-actions">
+            <button id="download-receipt">Download Receipt</button>
+          </div>
+        </div>
+      `;
 
       modal.style.display = "flex";
+
+      // Close modal
+      modal.querySelector("#close-receipt").addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      // Download PDF
+      modal.querySelector("#download-receipt").addEventListener("click", () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.text(`Transaction Receipt`, 20, 20);
+        doc.text(`Transaction ID: TX-${Math.floor(Math.random()*1000000)}`, 20, 30);
+        doc.text(`Reference Number: REF-${Math.floor(Math.random()*1000000)}`, 20, 40);
+        doc.text(`Payment Date: ${tx.date}`, 20, 50);
+        doc.text(`Time-Stamp: ${new Date().toLocaleTimeString()}`, 20, 60);
+
+        doc.text(`Payment Amount: ${tx.amount}`, 20, 70);
+        doc.text(`Transaction Fee: $0.00`, 20, 80);
+
+        doc.text(`From Account: JPMorgan Chase Bank, N.A. (****8433)`, 20, 90);
+        doc.text(`To Account: ${tx.recipientAccount}`, 20, 100);
+        doc.text(`Recipient Name: ${tx.recipientName}`, 20, 110);
+        doc.text(`Recipient Bank: ${tx.recipientBank}`, 20, 120);
+
+        doc.text(`Transaction Status: ${tx.status}`, 20, 130);
+
+        doc.save(`receipt-${tx.date}.pdf`);
+      });
     });
-  });
-
-  // Close modal
-  document.getElementById("close-receipt").addEventListener("click", function() {
-    document.getElementById("receipt-modal").style.display = "none";
-  });
-
-  // Download PDF
-  document.getElementById("download-receipt").addEventListener("click", function() {
-    const { jsPDF } = window.jspdf;
-    const modal = document.getElementById("receipt-modal");
-    const doc = new jsPDF();
-
-    const date = modal.querySelector("#r-date").textContent;
-    const desc = modal.querySelector("#r-desc").textContent;
-    const amount = modal.querySelector("#r-amount").textContent;
-    const status = modal.querySelector("#r-status").textContent;
-    const recipientName = modal.querySelector("#r-recipient-name").textContent;
-    const recipientAccount = modal.querySelector("#r-recipient-account").textContent;
-    const recipientBank = modal.querySelector("#r-recipient-bank").textContent;
-
-    doc.text(`Transaction Receipt`, 20, 20);
-    doc.text(`Date: ${date}`, 20, 30);
-    doc.text(`Description: ${desc}`, 20, 40);
-    doc.text(`Amount: ${amount}`, 20, 50);
-    doc.text(`Status: ${status}`, 20, 60);
-    doc.text(`Recipient Name: ${recipientName}`, 20, 70);
-    doc.text(`Recipient Account: ${recipientAccount}`, 20, 80);
-    doc.text(`Recipient Bank: ${recipientBank}`, 20, 90);
-
-    doc.save(`receipt-${date}.pdf`);
   });
 }
 
