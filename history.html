@@ -8,8 +8,10 @@
 <body>
 
 <header class="history-header">
-  <button onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
-  <h2>Transaction History</h2>
+  <h2>
+    Transaction History
+    <img src="cs-logo.png" alt="CS Bank Logo" class="header-logo">
+  </h2>
 </header>
 
 <main class="history-container">
@@ -27,6 +29,10 @@
       <!-- JS will populate -->
     </tbody>
   </table>
+
+  <div class="back-button-container">
+    <button onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+</div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
