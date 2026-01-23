@@ -117,3 +117,10 @@ th {
   margin: 8px 20px 16px 20px;  /* spacing around it */
   font-style: italic;   /* subtle professional touch */
 }
+
+.transaction-note {
+  font-size: 14px;
+  color: #555;       /* subtle gray for a professional look */
+  margin: 8px 20px;  /* space between header and table */
+  font-weight: 500;  /* slightly bold, clean */
+}
