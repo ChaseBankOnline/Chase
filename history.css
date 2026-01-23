@@ -124,3 +124,43 @@ th {
   margin: 8px 20px;  /* space between header and table */
   font-weight: 500;  /* slightly bold, clean */
 }
+
+/* Professional tweaks - add at the very bottom */
+.history-header h2 {
+  font-weight: 700;       /* slightly bolder for clarity */
+  letter-spacing: 0.5px;  /* subtle spacing for elegance */
+}
+
+.history-header .header-logo {
+  height: 42px;           /* slightly larger for balance */
+  width: auto;
+  display: block;
+}
+
+.transaction-note {
+  font-size: 14px;
+  color: #555;            /* professional gray */
+  margin: 12px 20px 20px 20px; /* spacing above and below table */
+  font-weight: 500;       /* slightly bold for clarity */
+  font-style: italic;     /* subtle professional style */
+}
+
+.income, .expense {
+  font-weight: 600;       /* slightly bolder amounts */
+  font-size: 15px;        /* slightly larger for clarity */
+}
+
+.site-footer {
+  margin-top: 40px;       /* more spacing from content above */
+  padding: 14px 20px;     /* slightly more padding */
+  border-top: 1px solid #004080; /* subtle separation */
+}
+
+/* Subtle table row hover effect for professionalism */
+table tbody tr {
+  transition: background 0.2s ease;
+}
+
+table tbody tr:hover {
+  background: #f1f5f9; /* very light gray, professional and subtle */
+}
