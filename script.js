@@ -409,8 +409,11 @@ updateBalancesUI();
       successModal.style.zIndex = 2000;
 
       // Fill modal with transaction info (guard each element)
-      const rid = $("r-id"); if (rid) rid.textContent = tx.id || Math.floor(Math.random() * 1000000);
-      const rref = $("r-ref"); if (rref) rref.textContent = tx.ref || "REF" + Math.floor(100000000 + Math.random() * 900000000);
+      const rid = $("r-id"); 
+      if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
+
+      const rref = $("r-ref"); 
+      if (rref) rref.textContent = tx.ref ?? "REF" + Math.floor(100000000 + Math.random() * 900000000);
       const now = new Date(tx.date ? tx.date : Date.now());
       const rdate = $("r-date"); if (rdate) rdate.textContent = now.toLocaleDateString();
       const rtime = $("r-time"); if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
