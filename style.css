@@ -854,11 +854,16 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   to { transform: rotate(360deg); }
 }
 
-/* Transaction types */
-li.income span {
+/* Only color the right span (the amount) */
+li.income span.amount {
   color: green;
 }
 
-li.expense span {
+li.expense span.amount {
   color: red;
+}
+
+/* Keep description neutral */
+li span.description {
+  color: #333; /* dark gray */
 }
