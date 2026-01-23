@@ -197,6 +197,11 @@ updateBalancesUI();
         left.textContent = tx.text || "";
         const right = document.createElement("span");
         right.textContent = (tx.type === "expense" ? "- " : "") + formatCurrency(isNaN(amt) ? 0 : amt);
+        if (tx.type === "income") {
+        right.style.color = "green";   // green for income
+       } else if (tx.type === "expense") {
+        right.style.color = "red";     // red for expense
+       }
         li.appendChild(left);
         li.appendChild(right);
 
