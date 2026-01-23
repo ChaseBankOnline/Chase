@@ -44,12 +44,34 @@
     // ===== INITIAL TRANSACTIONS =====
     let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
     if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
-      savedTransactions = [
-        { type: "expense", text: "Netflix — Entertainment", amount: "$150.00", date: "2026-01-05", recipient: "Netflix, Inc.", account: "Charlesweahh@gmail.com", bank: "Charles", note: "" },
-        { type: "expense", text: "Interior — Blessed", amount: "$69,000.00", date: "2026-01-09", recipient: "Studio O+A, Inc.", account: "28064922651", bank: "BOA", note: "" }
-      ];
-      localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+     savedTransactions = [
+    { 
+      id: 100001,
+      ref: "REF100001", 
+      type: "expense", 
+      text: "Netflix — Entertainment", 
+      amount: "$150.00", 
+      date: "2026-01-05", 
+      recipient: "Netflix, Inc.", 
+      account: "Charlesweahh@gmail.com", 
+      bank: "Charles", 
+      note: "" 
+    },
+    { 
+      id: 100002,
+      ref: "REF100002", 
+      type: "expense", 
+      text: "Interior — Blessed", 
+      amount: "$69,000.00", 
+      date: "2026-01-09", 
+      recipient: "Studio O+A, Inc.", 
+      account: "28064922651", 
+      bank: "BOA", 
+      note: "" 
     }
+  ];
+  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+  }
 
     // Normalize loaded transaction amounts to numbers (avoid mixed types)
     savedTransactions = savedTransactions.map(tx => {
