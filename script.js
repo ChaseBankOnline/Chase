@@ -1019,37 +1019,6 @@ updateBalancesUI();
 
     if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
     if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
-
-    (function () {
-  // Safe, compatible handler for the "View History" action.
-  // Add this file after your main script.js (non-destructive).
-  var btn = document.getElementById("view-history-btn");
-  if (!btn) return;
-
-  btn.addEventListener("click", function (e) {
-    try {
-      // Prevent default navigation/submission if this element is an <a> or inside a form
-      if (e && typeof e.preventDefault === "function") e.preventDefault();
-
-      // Create loader
-      var loader = document.createElement("div");
-      loader.id = "page-loader";
-      loader.innerHTML = '<div class="spinner"></div><p>Loading transaction history…</p>';
-
-      // Append loader only once
-      if (!document.getElementById("page-loader")) {
-        document.body.appendChild(loader);
-      }
-
-      // Navigate after a short delay (simulate load)
-      setTimeout(function () {
-        // remove loader before navigating (best-effort)
-        try { var l = document.getElementById("page-loader"); if (l && l.parentNode) l.parentNode.removeChild(l); } catch (ignore) {}
-        window.location.href = "history.html";
-      }, 2500);
-    } catch (err) {
-      // Prevent this handler from breaking other scripts
-      console.error("view-history handler error:", err);
-    }
+    
   });
-})();  
+})();
