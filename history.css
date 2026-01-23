@@ -49,3 +49,13 @@ th {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* Amount colors */
+.income {
+  color: green;
+  font-weight: bold;
+}
+.expense {
+  color: red;
+  font-weight: bold;
+}
