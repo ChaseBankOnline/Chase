@@ -854,16 +854,29 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   to { transform: rotate(360deg); }
 }
 
-/* Only color the right span (the amount) */
+/* Transaction list items layout */
+li {
+  display: flex;
+  justify-content: space-between; /* description left, amount right */
+  align-items: center;
+  padding: 8px 12px; /* subtle padding for neat spacing */
+  border-bottom: 1px solid #eee; /* optional, separates transactions */
+  font-family: Arial, sans-serif; /* clean, professional font */
+}
+
+/* Amount styling */
 li.income span.amount {
   color: green;
+  font-weight: 600; /* slightly bold */
 }
 
 li.expense span.amount {
   color: red;
+  font-weight: 600; /* slightly bold */
 }
 
-/* Keep description neutral */
+/* Description styling */
 li span.description {
   color: #333; /* dark gray */
+  font-weight: 500; /* medium weight */
 }
