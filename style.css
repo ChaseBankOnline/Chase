@@ -816,3 +816,16 @@ canvas#spendingChart { width: 100% !important; height: 200px !important; }
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.25); /* subtle professional border */
 }
+
+#view-history-btn {
+  background: transparent;
+  color: #005eb8;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+#view-history-btn:hover {
+  text-decoration: underline;
+}
