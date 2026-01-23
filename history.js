@@ -26,16 +26,20 @@ const historyData = [
 ];
 
 // ---------------------------
-// Populate Table
+// Populate Table with colors
 // ---------------------------
 const tbody = document.getElementById("history-body");
 
 historyData.forEach(tx => {
   const row = document.createElement("tr");
+
+  // Determine color based on amount
+  let amountClass = tx.amount.startsWith("+") ? "income" : "expense";
+
   row.innerHTML = `
     <td>${tx.date}</td>
     <td>${tx.desc}</td>
-    <td>${tx.amount}</td>
+    <td class="${amountClass}">${tx.amount}</td>
     <td>${tx.status}</td>
     <td><button class="receipt-btn">View Receipt</button></td>
   `;
