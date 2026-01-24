@@ -41,55 +41,38 @@
       smsNotif: false
     };
 
-   // ===== INITIAL TRANSACTIONS =====
-let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
-if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
-  savedTransactions = [
+    // ===== INITIAL TRANSACTIONS =====
+    let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
+    if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
+     savedTransactions = [
     { 
-      id: 100001,
-      ref: "REF100001", 
-      type: "expense", 
-      text: "Netflix — Entertainment", 
-      amount: "$150.00", 
-      date: "2026-01-05T05:25:00",
-      recipient: "Netflix, Inc.", 
-      account: "Charlesweahh@gmail.com", 
-      bank: "Charles", 
-      note: "" 
-    },
-    { 
-      id: 100002,
-      ref: "REF100002", 
-      type: "expense", 
-      text: "Interior — Blessed", 
-      amount: "$69,000.00", 
-      date: "2026-01-09T01:11:25",
-      recipient: "Studio O+A, Inc.", 
-      account: "28064922651", 
-      bank: "BOA", 
-      note: "" 
-    },
-    {
-      id: 100811,
-      ref: 2026023,
-      type: "income",
-      text: "Profit distribution from interior design & furniture investment",
-      amount: 500000,
-      date: "2026-01-23T10:30:00",  // Fixed date and time
-      status: "completed",
-      recipient: "Charles Williams",
-      recipientAccount: "21908488433",
-      recipientBank: "Charles Williams",
-      senderName: "Johnny Adams",
-      senderAccount: "15623948807",
-      senderBank: "Wells Fargo",
-      note: ""
-    }
-  ];
-
-  // Save updated transactions
-  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+  id: 100001,
+  ref: "REF100001", 
+  type: "expense", 
+  text: "Netflix — Entertainment", 
+  amount: "$150.00", 
+  date: "2026-01-05T05:25:00",
+  recipient: "Netflix, Inc.", 
+  account: "Charlesweahh@gmail.com", 
+  bank: "Charles", 
+  note: "" 
+},
+{ 
+  id: 100002,
+  ref: "REF100002", 
+  type: "expense", 
+  text: "Interior — Blessed", 
+  amount: "$69,000.00", 
+  date: "2026-01-09T01:11:25",  // 1:11:25 AM
+  recipient: "Studio O+A, Inc.", 
+  account: "28064922651", 
+  bank: "BOA", 
+  note: "" 
 }
+  ];
+  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+  }
+
     // Normalize loaded transaction amounts to numbers (avoid mixed types)
     savedTransactions = savedTransactions.map(tx => {
       const amt = parseAmount(tx.amount);
@@ -387,21 +370,19 @@ updateBalancesUI();
       totalBalance = computeTotalFromAccounts(accounts);
 
       const txObj = {
-      id: Math.floor(Math.random() * 1000000),
-      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-      type: txProps.type || "income",
-      text: txProps.text || `Payment from ${txProps.senderName || "Unknown"}`,
-      amount: parseAmount(txProps.amount) || 0,
-      date: new Date().toISOString(),
-      status: txProps.status || "completed",
-      recipient: demoUser.fullName,              // YOU
-      recipientAccount: accounts.checking.id,    // YOUR ACCOUNT ID
-      recipientBank: txProps.recipientBank || "Standard Bank",
-      senderName: txProps.senderName || "Unknown",
-      senderAccount: txProps.senderAccount || "N/A",
-      senderBank: txProps.senderBank || "N/A",
-      note: txProps.note || ""
-    };
+        id: Math.floor(Math.random() * 1000000),
+        ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+        type: txProps.type || "income",
+        text: txProps.text || "",
+        amount: numericAmt,
+        date: new Date().toISOString(),
+        status: txProps.status || "completed",
+        recipient: txProps.recipient || "",
+        account: txProps.account || "",
+        bank: txProps.bank || "",
+        note: txProps.note || ""
+      };
+
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
       renderTransactions();
@@ -442,13 +423,13 @@ updateBalancesUI();
 
       const rrecipient = $("r-recipient");
       const rname = $("r-name");
-      if (tx.type === "income") {
-      if (rrecipient) rrecipient.textContent = `${tx.senderName || "[Sender]"} — ${tx.senderAccount || "[Account]"} (${tx.senderBank || "[Bank]"})`;
-      if (rname) rname.textContent = tx.senderName || "[Sender]";
-     } else {
-      if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Recipient]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
-      if (rname) rname.textContent = tx.recipient || "[Recipient]";
-     }
+      if (tx.account || tx.bank) {
+        if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
+        if (rname) rname.textContent = tx.recipient || "[Name]";
+      } else {
+        if (rrecipient) rrecipient.textContent = tx.recipient || tx.text || "[Name]";
+        if (rname) rname.textContent = tx.recipient || tx.text || "[Name]";
+      }
 
       const modalHeading = successModal.querySelector("h2");
       if (modalHeading) {
@@ -498,7 +479,7 @@ updateBalancesUI();
         pendingTransaction = null;
       });
 
-       // ===== PROCEED CONFIRM =====
+        // ===== PROCEED CONFIRM =====
       proceedConfirm.addEventListener("click", () => {
         confirmModal.style.display = "none";
         if (pendingTransaction && pinModal) {
@@ -762,18 +743,18 @@ updateBalancesUI();
                 const { recipient, amount } = details;
                 // Request: create pending income transaction but DO NOT change balance yet
                 const txObj = {
-                id: details.id || Date.now(),  // unique, deterministic
-                ref: details.ref || `REF${Date.now()}`,  // deterministic reference
-                type: "income",
-                text: `Request from ${recipient}`,
-                amount: amount,
-                date: new Date().toISOString(),
-                status: "pending",
-                recipient: recipient,
-                account: details.account || "",
-                bank: details.bank || "",
-                note: details.note || ""
-              };
+                  id: Math.floor(Math.random() * 1000000),
+                  ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+                  type: "income",
+                  text: `Request from ${recipient}`,
+                  amount: amount,
+                  date: new Date().toISOString(),
+                  status: "pending",
+                  recipient: recipient,
+                  account: details.account || "",
+                  bank: details.bank || "",
+                  note: details.note || ""
+                };
                 savedTransactions.unshift(txObj);
                 saveTransactionsAndBalance();
                 renderTransactions();
@@ -888,8 +869,6 @@ updateBalancesUI();
         const details = window.lastTransactionDetails;
         if (!details) return alert("No transaction data available for PDF.");
 
-        console.log("Generating receipt for transaction:", details);
-
         // Auto-fill reference number if empty
         if ($("r-ref") && !$("r-ref").textContent) {
           $("r-ref").textContent = details.ref || ("REF" + Math.floor(100000000 + Math.random() * 900000000));
@@ -959,19 +938,10 @@ updateBalancesUI();
         // Account Info
         doc.setFontSize(14); doc.text("Account Information", 20, y); y += 8;
         doc.setFontSize(12);
-        let fromAccountText = "";
+        doc.text("From Account: JPMorgan Chase Bank, N.A. (****8433)", 20, y); y += 8;
+        doc.text("SWIFT / BIC: CHASUS33", 20, y); y += 8;
 
-        if (details.type === "income") {
-        fromAccountText = [
-        details.senderName,
-        details.senderAccount,
-        details.senderBank
-       ].filter(Boolean).join(" — ") || "[Sender info missing]";
-      } else {
-        fromAccountText = "JPMorgan Chase Bank, N.A. (****8433)";
-      }
-
-        doc.text("From Account: " + fromAccountText, 20, y);
+        doc.text(`To Account: ${recipient}`, 20, y);
         y += 12;
 
         // Authorization Statement
@@ -982,7 +952,7 @@ updateBalancesUI();
         doc.text(splitAuth, 20, y);
         y += splitAuth.length * 7 + 4;
 
-        // Transaction Status
+         // Transaction Status
         doc.setFontSize(12);
         doc.text(`Transaction Status: ${details.status || "Completed / Successful"}`, 20, y); y += 12;
 
