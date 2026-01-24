@@ -391,19 +391,23 @@ updateBalancesUI();
       totalBalance = computeTotalFromAccounts(accounts);
 
       const txObj = {
-        id: Math.floor(Math.random() * 1000000),
-        ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-        type: txProps.type || "income",
-        text: txProps.text || "",
-        amount: numericAmt,
-        date: new Date().toISOString(),
-        status: txProps.status || "completed",
-        recipient: txProps.recipient || "",
-        account: txProps.account || "",
-        bank: txProps.bank || "",
-        note: txProps.note || ""
-      };
+      id: Math.floor(Math.random() * 1000000),
+      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+      type: txProps.type || "income",
+      text: txProps.text || "",
+      amount: numericAmt,
+      date: new Date().toISOString(),
+      status: txProps.status || "completed",
+      recipient: txProps.recipient || "",
+      account: txProps.account || "",
+      bank: txProps.bank || "",
+      note: txProps.note || "",
 
+      // ADD THESE LINES:
+      senderName: txProps.senderName || "",
+      senderAccount: txProps.senderAccount || "",
+      senderBank: txProps.senderBank || ""
+     };
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
       renderTransactions();
