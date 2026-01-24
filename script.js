@@ -70,12 +70,12 @@ if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
       note: "" 
     },
     {
-      id: Math.floor(Math.random() * 1000000),
-      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+      id: 100811,
+      ref: 2026023,
       type: "income",
-      text: "Special Investment Profit",
+      text: "Profit distribution from interior design & furniture investment",
       amount: 500000,
-      date: "2026-01-15T10:30:00",  // Fixed date and time
+      date: "2026-01-23T10:30:00",  // Fixed date and time
       status: "completed",
       recipient: "Charles Williams",
       recipientAccount: "21908488433",
