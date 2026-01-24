@@ -31,10 +31,33 @@ const historyData = [
 // ---------------------------
 const tbody = document.getElementById("history-body");
 
+// Function to get From/To accounts dynamically
+function getFromToAccounts(tx) {
+  const yourAccountName = "JPMorgan Chase Bank, N.A.";
+  const yourAccountNumber = "****8433";
+
+  if (tx.amount.startsWith("+")) {
+    return {
+      fromName: tx.recipientName,
+      fromAccount: tx.recipientAccount,
+      toName: "Your Account",
+      toAccount: `${yourAccountName} (${yourAccountNumber})`
+    };
+  } else {
+    return {
+      fromName: "Your Account",
+      fromAccount: `${yourAccountName} (${yourAccountNumber})`,
+      toName: tx.recipientName,
+      toAccount: tx.recipientAccount
+    };
+  }
+}
+
+// Populate table with all details including From/To
 historyData.forEach(tx => {
+  const accounts = getFromToAccounts(tx);
   const row = document.createElement("tr");
 
-  // Determine color based on amount
   let amountClass = tx.amount.startsWith("+") ? "income" : "expense";
 
   row.innerHTML = `
@@ -42,6 +65,7 @@ historyData.forEach(tx => {
     <td>${tx.desc}</td>
     <td class="${amountClass}">${tx.amount}</td>
     <td>${tx.status}</td>
+    <td>From: ${accounts.fromName} (${accounts.fromAccount})<br>To: ${accounts.toName} (${accounts.toAccount})</td>
     <td><button class="receipt-btn">View Receipt</button></td>
   `;
   tbody.appendChild(row);
@@ -56,6 +80,8 @@ function handleViewReceiptClicks() {
       const row = btn.closest("tr");
       const index = Array.from(tbody.children).indexOf(row);
       const tx = historyData[index];
+
+      const accounts = getFromToAccounts(tx);
 
       const modal = document.getElementById("receipt-modal");
 
@@ -78,9 +104,8 @@ function handleViewReceiptClicks() {
           <hr>
 
           <h3>Account Information</h3>
-          <p><strong>From Account:</strong> JPMorgan Chase Bank, N.A. (****8433)</p>
-          <p><strong>To Account:</strong> ${tx.recipientAccount}</p>
-          <p><strong>Recipient Name:</strong> ${tx.recipientName}</p>
+          <p><strong>From Account:</strong> ${accounts.fromName} (${accounts.fromAccount})</p>
+          <p><strong>To Account:</strong> ${accounts.toName} (${accounts.toAccount})</p>
           <p><strong>Recipient Bank:</strong> ${tx.recipientBank}</p>
 
           <hr>
@@ -118,20 +143,17 @@ function handleViewReceiptClicks() {
 
         let y = 20;
 
-        // Logo
         try {
           const logo = new Image();
           logo.src = "chase-logo.png";
           doc.addImage(logo, "PNG", 20, 12, 35, 12);
         } catch(e){}
 
-        // Watermark
         doc.setTextColor(220);
         doc.setFontSize(40);
         doc.text("CONFIDENTIAL", 105, 150, { align: "center", angle: 30 });
         doc.setTextColor(0);
 
-        // Header
         doc.setFontSize(18);
         doc.text("JPMORGAN CHASE BANK", 105, y, { align: "center" });
         y += 8;
@@ -139,32 +161,27 @@ function handleViewReceiptClicks() {
         doc.text("PAYMENT RECEIPT", 105, y, { align: "center" });
         y += 16;
 
-        // Line
         doc.setLineWidth(0.5);
         doc.line(20, y, 190, y);
         y += 10;
 
-        // Transaction Info
         doc.setFontSize(12);
         doc.text(`Transaction ID: ${tx.transactionID}`, 20, y); y+=8;
         doc.text(`Reference Number: ${tx.referenceNumber}`, 20, y); y+=8;
         doc.text(`Payment Date: ${tx.date}`, 20, y); y+=8;
         doc.text(`Time‑Stamp: ${tx.time}`, 20, y); y+=12;
 
-        // Transfer Details
         doc.setFontSize(14); doc.text("Transfer Details", 20, y); y+=8;
         doc.setFontSize(12);
         doc.text(`Payment Amount: ${tx.amount}`, 20, y); y+=8;
         doc.text(`Transaction Fee: $0.00`, 20, y); y+=8;
 
-        // Account Info
         doc.setFontSize(14); doc.text("Account Information", 20, y); y+=8;
         doc.setFontSize(12);
-        doc.text("From Account: JPMorgan Chase Bank, N.A. (****8433)", 20, y); y+=8;
-        doc.text("SWIFT / BIC: CHASUS33", 20, y); y+=8;
-        doc.text(`To Account: ${tx.recipientName} (${tx.recipientAccount})`, 20, y); y+=12;
+        doc.text(`From Account: ${accounts.fromName} (${accounts.fromAccount})`, 20, y); y+=8;
+        doc.text(`To Account: ${accounts.toName} (${accounts.toAccount})`, 20, y); y+=8;
+        doc.text(`Recipient Bank: ${tx.recipientBank}`, 20, y); y+=12;
 
-        // Authorization
         doc.setFontSize(14); doc.text("Authorization Statement", 20, y); y+=8;
         doc.setFontSize(12);
         const authText = "I hereby confirm that I have authorized an electronic debit from my payment account in the amount stated above. This transaction was approved by the account holder and processed in accordance with applicable banking regulations.";
@@ -172,17 +189,14 @@ function handleViewReceiptClicks() {
         doc.text(splitAuth, 20, y);
         y += splitAuth.length * 7 + 4;
 
-        // Status
         doc.setFontSize(12);
         doc.text(`Transaction Status: ${tx.status}`, 20, y); y+=12;
 
-        // Footer
         doc.setLineWidth(0.5);
         doc.line(20, y, 190, y); y+=6;
         doc.setFontSize(10);
         doc.text("This receipt was generated electronically.", 105, y, { align: "center" });
 
-        // Save PDF
         doc.save(`${tx.transactionID}.pdf`);
       });
     });
