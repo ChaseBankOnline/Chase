@@ -444,24 +444,29 @@ updateBalancesUI();
   const rfee = $("r-fee"); if (rfee) rfee.textContent = "0.00";
 
   // Sender & Recipient
-  const rsender = $("r-sender");
-  if (rsender) {
-    rsender.textContent = (tx.senderName || "[Sender Name]") + " — " + (tx.senderAccount || "[Account]") + " (" + (tx.senderBank || "[Bank]") + ")";
-  }
+const rsender = $("r-sender");
+if (rsender) {
+  const senderName = tx.senderName || "N/A";
+  const senderAccount = tx.senderAccount || "N/A";
+  const senderBank = tx.senderBank || "N/A"; // will show Wells Fargo if present
+  rsender.textContent = `${senderName} — ${senderAccount} (${senderBank})`;
+}
 
-  const rrecipient = $("r-recipient");
-  if (rrecipient) {
-    rrecipient.textContent = (tx.recipient || "[Recipient Name]") + " — " + (tx.account || "[Account]") + " (" + (tx.bank || "[Bank]") + ")";
-  }
+const rrecipient = $("r-recipient");
+if (rrecipient) {
+  const recipientName = tx.recipient || "N/A";
+  const recipientAccount = tx.account || "N/A";
+  const recipientBank = tx.bank || "N/A";
+  rrecipient.textContent = `${recipientName} — ${recipientAccount} (${recipientBank})`;
+}
 
-  const modalHeading = successModal.querySelector("h2");
-  if (modalHeading) {
-    modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
-  }
+const modalHeading = successModal.querySelector("h2");
+if (modalHeading) {
+  modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
+}
 
-  // Save globally for PDF
-  window.lastTransactionDetails = tx;
-  }
+// Save globally for PDF
+window.lastTransactionDetails = tx;
 
     // Get confirm modal elements (may be missing in some pages)
     const confirmModal = $("confirm-modal");
