@@ -68,6 +68,18 @@
   account: "28064922651", 
   bank: "BOA", 
   note: "" 
+},
+{ 
+  id: 1100012,
+  ref: "REF1100012", 
+  type: "income", 
+  text: "Profit distribution from interior design & furniture investment", 
+  amount: "$400,000.00", 
+  date: "2026-01-23T00:09:13",
+  recipient: "Charles Williams", 
+  account: "(****8433).", 
+  bank: "Chase Bank", 
+  note: "" 
 }
   ];
   localStorage.setItem("transactions", JSON.stringify(savedTransactions));
@@ -103,7 +115,7 @@ const checkingBalanceEl = $("checking-balance");
 const investmentBalanceEl = $("investment-balance");
 
 // Load accounts
-let accounts;
+lt accounts;
 try {
   accounts = JSON.parse(localStorage.getItem("accounts"));
 } catch {
