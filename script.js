@@ -423,10 +423,23 @@ updateBalancesUI();
 
       const rrecipient = $("r-recipient");
       const rname = $("r-name");
-      if (tx.account || tx.bank) {
-        if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
-        if (rname) rname.textContent = tx.recipient || "[Name]";
-      } else {
+
+      // EXPENSE → money leaving your bank
+      if (tx.type === "expense") {
+      if (rrecipient)
+      rrecipient.textContent = `To: ${tx.recipient || "[Recipient]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
+      if (rname)
+      rname.textContent = tx.recipient || "[Recipient]";
+     }
+
+      // INCOME → money coming into your bank
+      if (tx.type === "income") {
+      if (rrecipient)
+      rrecipient.textContent = `From: ${tx.recipient || "[Sender]"} (${tx.bank || "External Bank"}) → Your Account`;
+      if (rname)
+      rname.textContent = tx.recipient || "[Sender]";
+     }
+      else {
         if (rrecipient) rrecipient.textContent = tx.recipient || tx.text || "[Name]";
         if (rname) rname.textContent = tx.recipient || tx.text || "[Name]";
       }
@@ -941,7 +954,11 @@ updateBalancesUI();
         doc.text("From Account: JPMorgan Chase Bank, N.A. (****8433)", 20, y); y += 8;
         doc.text("SWIFT / BIC: CHASUS33", 20, y); y += 8;
 
+        if (details.type === "income") {
+        doc.text(`From Account: ${details.recipient || "External Bank"} → Your Account`, 20, y);
+       } else {
         doc.text(`To Account: ${recipient}`, 20, y);
+       }
         y += 12;
 
         // Authorization Statement
