@@ -970,25 +970,46 @@ updateBalancesUI();
         doc.text(`Transaction Fee: ${fee}`, 20, y); y += 8;
 
         // Account Info
-        doc.setFontSize(14); doc.text("Account Information", 20, y); y += 8;
-        doc.setFontSize(12);
-        if (details.type === "income") {
-        // Money coming to you
-        doc.text(`From Account: ${details.senderName || "[Sender]"} — ${details.senderAccount || "[Account]"} (${details.senderBank || "[Bank]"})`, 20, y);
+        doc.setFontSize(14);
+        doc.text("Account Information", 20, y);
         y += 8;
-        doc.text(`To Account: ${details.recipient || "[You]"} — ${details.account || "[Account]"} (${details.bank || "[Bank]"})`, 20, y);
-        y += 8;
-       } else {
-        // Money going out from you
-        doc.text(`From Account: ${details.account || "[You]"} — ${details.accountNumber || "[Account]"} (${details.bank || "[Bank]"})`, 20, y);
-        y += 8;
-        doc.text(`To Account: ${details.recipient || "[Recipient]"} — ${details.recipientAccount || "[Account]"} (${details.recipientBank || "[Bank]"})`, 20, y);
-        y += 8;
-       }
-        doc.text("SWIFT / BIC: CHASUS33", 20, y); y += 8;
 
-        doc.text(`To Account: ${recipient}`, 20, y);
-        y += 12;
+        doc.setFontSize(12);
+
+        if (details.type === "income") {
+        // Incoming money (SENDER → YOU)
+        doc.text(
+        `From Account: ${details.senderName || "[Sender]"} — ${details.senderAccount || "[Account]"} (${details.senderBank || "[Bank]"})`,
+         20,
+         y
+        );
+         y += 8;
+
+         doc.text(
+         `To Account: ${details.recipient || "[You]"} — ${details.account || "[Account]"} (${details.bank || "[Bank]"})`,
+          20,
+          y
+         );
+          y += 8;
+         } else {
+         // Outgoing money (YOU → RECIPIENT)
+         doc.text(
+          `From Account: ${demoProfile.fullName} — ${accounts.checking.id} (JPMorgan Chase Bank, N.A.)`,
+          20,
+          y
+         );
+          y += 8;
+
+         doc.text(
+          `To Account: ${details.recipient || "[Recipient]"} — ${details.account || "[Account]"} (${details.bank || "[Bank]"})`,
+          20,
+           y
+         );
+           y += 8;
+         }
+
+          doc.text("SWIFT / BIC: CHASUS33", 20, y);
+          y += 12;
 
         // Authorization Statement
         doc.setFontSize(14); doc.text("Authorization Statement", 20, y); y += 8;
