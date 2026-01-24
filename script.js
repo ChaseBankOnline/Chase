@@ -386,18 +386,21 @@ updateBalancesUI();
       totalBalance = computeTotalFromAccounts(accounts);
 
       const txObj = {
-        id: Math.floor(Math.random() * 1000000),
-        ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-        type: txProps.type || "income",
-        text: txProps.text || "",
-        amount: numericAmt,
-        date: new Date().toISOString(),
-        status: txProps.status || "completed",
-        recipient: txProps.recipient || "",
-        account: txProps.account || "",
-        bank: txProps.bank || "",
-        note: txProps.note || ""
-      };
+      id: Math.floor(Math.random() * 1000000),
+      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+      type: "income",
+      text: `Payment from ${details.senderName || "Unknown"}`,
+      amount: amount,
+      date: new Date().toISOString(),
+      status: "completed",
+      recipient: demoUser.fullName,          // your name
+      recipientAccount: accounts.checking.id, // your account
+      recipientBank: "Your Bank Name",       // your bank
+      senderName: details.senderName || "Unknown",   // sender name
+      senderAccount: details.senderAccount || "",    // sender account
+      senderBank: details.senderBank || "",          // sender bank
+      note: details.note || ""
+    };
 
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
@@ -957,19 +960,11 @@ updateBalancesUI();
         let fromAccountText = "";
 
         if (details.type === "income") {
-        // show external sender dynamically
-        fromAccountText = `${details.text} - ${details.bank} (${details.account})`;
-        } else {
-        // show your own account for expenses
+        fromAccountText = `${details.senderName} — ${details.senderAccount} (${details.senderBank})`;
+       } else {
         fromAccountText = "JPMorgan Chase Bank, N.A. (****8433)";
-        }
-
-        doc.text("From Account: " + fromAccountText, 20, y); 
-        y += 8;
-        doc.text("SWIFT / BIC: CHASUS33", 20, y); 
-        y += 8;
-
-        doc.text(`To Account: ${details.recipient}`, 20, y);
+       }
+        doc.text("From Account: " + fromAccountText, 20, y);
         y += 12;
 
         // Authorization Statement
