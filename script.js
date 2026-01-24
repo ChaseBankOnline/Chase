@@ -41,10 +41,10 @@
       smsNotif: false
     };
 
-      // ===== INITIAL TRANSACTIONS =====
+    // ===== INITIAL TRANSACTIONS =====
 let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
 
-// Only add this default if there are no transactions at all
+// Only add these defaults if there are no transactions at all
 if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
   savedTransactions = [
     { 
@@ -72,27 +72,27 @@ if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
       note: "" 
     },
     {
-  id: 100811,
-  ref: "REF2026023",
-  type: "income",
-  text: "Profit distribution from interior design & furniture investment",
-  amount: "$500,000.00",
-  date: "2026-01-23T10:30:00",
-  status: "completed",
-  recipient: "Charles Williams",
-  account: "21908488433", // Your JP Morgan Chase account
-  bank: "JP Morgan Chase Bank",
-  senderName: "Johnny Adams",
-  senderAccount: "15623948807",
-  senderBank: "Wells Fargo",
-  note: ""
+      id: 100811,
+      ref: "REF2026023",
+      type: "income",
+      text: "Profit distribution from interior design & furniture investment",
+      amount: "$500,000.00",
+      date: "2026-01-23T10:30:00",
+      status: "completed",
+      recipient: "Charles Williams",
+      account: "21908488433",
+      bank: "JP Morgan Chase Bank",
+      senderName: "Johnny Adams",
+      senderAccount: "15623948807",
+      senderBank: "Wells Fargo",
+      note: ""
     }
-];
+  ];
 
-// Save to localStorage
-localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+  // Save hard-coded transactions to localStorage
+  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
 }
-    
+      
     // Normalize loaded transaction amounts to numbers (avoid mixed types)
     savedTransactions = savedTransactions.map(tx => {
       const amt = parseAmount(tx.amount);
