@@ -888,6 +888,8 @@ updateBalancesUI();
         const details = window.lastTransactionDetails;
         if (!details) return alert("No transaction data available for PDF.");
 
+        console.log("Generating receipt for transaction:", details);
+
         // Auto-fill reference number if empty
         if ($("r-ref") && !$("r-ref").textContent) {
           $("r-ref").textContent = details.ref || ("REF" + Math.floor(100000000 + Math.random() * 900000000));
@@ -959,11 +961,15 @@ updateBalancesUI();
         doc.setFontSize(12);
         let fromAccountText = "";
 
-        if (details.type === "income") {
+        if (details.type === "income" && details.senderName && details.senderAccount && details.senderBank) {
         fromAccountText = `${details.senderName} — ${details.senderAccount} (${details.senderBank})`;
+       } else if (details.type === "income") {
+        fromAccountText = "[Sender info missing]";
        } else {
+        // Expense / outgoing transactions
         fromAccountText = "JPMorgan Chase Bank, N.A. (****8433)";
        }
+
         doc.text("From Account: " + fromAccountText, 20, y);
         y += 12;
 
