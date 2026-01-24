@@ -389,18 +389,18 @@ updateBalancesUI();
       const txObj = {
       id: Math.floor(Math.random() * 1000000),
       ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-      type: "income",  // incoming payment
-      text: `Payment from ${details.senderName || "Unknown"}`,
-      amount: parseAmount(details.amount) || 0,
+      type: txProps.type || "income",
+      text: txProps.text || `Payment from ${txProps.senderName || "Unknown"}`,
+      amount: parseAmount(txProps.amount) || 0,
       date: new Date().toISOString(),
-      status: "completed",
-      recipient: demoUser.fullName,          // YOU
-      recipientAccount: accounts.checking.id,// YOUR ACCOUNT ID
-      recipientBank: "Standard Bank",        // YOUR BANK
-      senderName: details.senderName || "Unknown",   
-      senderAccount: details.senderAccount || "N/A",  
-      senderBank: details.senderBank || "N/A",        
-      note: details.note || ""
+      status: txProps.status || "completed",
+      recipient: demoUser.fullName,              // YOU
+      recipientAccount: accounts.checking.id,    // YOUR ACCOUNT ID
+      recipientBank: txProps.recipientBank || "Standard Bank",
+      senderName: txProps.senderName || "Unknown",
+      senderAccount: txProps.senderAccount || "N/A",
+      senderBank: txProps.senderBank || "N/A",
+      note: txProps.note || ""
     };
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
