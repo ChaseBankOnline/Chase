@@ -391,18 +391,17 @@ updateBalancesUI();
       ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
       type: "income",
       text: `Payment from ${details.senderName || "Unknown"}`,
-      amount: amount,
+      amount: parseAmount(details.amount) || 0,
       date: new Date().toISOString(),
       status: "completed",
       recipient: demoUser.fullName,          // your name
-      recipientAccount: accounts.checking.id, // your account
-      recipientBank: "Your Bank Name",       // your bank
-      senderName: details.senderName || "Unknown",   // sender name
-      senderAccount: details.senderAccount || "",    // sender account
-      senderBank: details.senderBank || "",          // sender bank
+      recipientAccount: accounts.checking.id, // your account ID
+      recipientBank: "JPMorgan Chase Bank",  // your real bank
+      senderName: details.senderName || "Unknown",
+      senderAccount: details.senderAccount || "N/A",
+      senderBank: details.senderBank || "N/A",
       note: details.note || ""
     };
-
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
       renderTransactions();
