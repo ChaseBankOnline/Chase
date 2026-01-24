@@ -70,12 +70,8 @@ if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
       account: "28064922651", 
       bank: "BOA", 
       note: "" 
-    }
-  ];
-}
-
-// ===== ADD YOUR SINGLE INCOME TRANSACTION =====
-const incomeTransaction = {
+    },
+    {
   id: 100811,
   ref: "REF2026023",
   type: "income",
@@ -90,16 +86,12 @@ const incomeTransaction = {
   senderAccount: "15623948807",
   senderBank: "Wells Fargo",
   note: ""
-};
-
-// Remove any old version of this transaction if it exists
-savedTransactions = savedTransactions.filter(t => t.id !== 100811);
-
-// Add the income transaction
-savedTransactions.push(incomeTransaction);
+    }
+];
 
 // Save to localStorage
 localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+}
 
 // Update UI and balances
 renderTransactions();
