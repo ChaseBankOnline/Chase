@@ -445,21 +445,50 @@ updateBalancesUI();
       const rrecipient = $("r-recipient");
       const rname = $("r-name");
 
-      // For income transactions show sender details (From)
-      if (tx.type === "income" && (tx.senderName || tx.senderAccount || tx.senderBank)) {
-        // Prefer showing sender information
-        if (rrecipient) rrecipient.textContent = `${tx.senderName || "[Sender Name]"} — ${tx.senderAccount || "[Account]"} (${tx.senderBank || "[Bank]"})`;
-        if (rname) rname.textContent = tx.senderName || tx.recipient || tx.text || "[Name]";
-      } else {
-        // Default behavior: show recipient / beneficiary
-        if (tx.account || tx.bank) {
-          if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
-          if (rname) rname.textContent = tx.recipient || "[Name]";
-        } else {
-          if (rrecipient) rrecipient.textContent = tx.recipient || tx.text || "[Name]";
-          if (rname) rname.textContent = tx.recipient || tx.text || "[Name]";
-        }
-      }
+// ===============================
+// RECEIPT: FROM / TO (FINAL)
+// ===============================
+
+const rsender = $("r-sender");
+const rrecipient = $("r-recipient");
+const rname = $("r-name");
+
+if (tx.type === "income") {
+
+  // FROM: external sender
+  if (rsender) {
+    rsender.textContent =
+      `${tx.senderName || "N/A"} (****${tx.senderAccount?.slice(-4) || "N/A"})`;
+  }
+
+  // TO: your account (JPMorgan)
+  if (rrecipient) {
+    rrecipient.textContent =
+      `Your Account — ${tx.bank} (****${tx.account?.slice(-4) || "N/A"})`;
+  }
+
+  if (rname) {
+    rname.textContent = tx.senderName || "Income Transaction";
+  }
+
+} else {
+
+  // FROM: your account (JPMorgan)
+  if (rsender) {
+    rsender.textContent =
+      `Your Account — ${tx.bank} (****${tx.account?.slice(-4) || "N/A"})`;
+  }
+
+  // TO: external recipient
+  if (rrecipient) {
+    rrecipient.textContent =
+      `${tx.recipient || "N/A"} (****${tx.account?.slice(-4) || "N/A"})`;
+  }
+
+  if (rname) {
+    rname.textContent = tx.recipient || "Expense Transaction";
+  }
+}
 
       const modalHeading = successModal.querySelector("h2");
       if (modalHeading) {
