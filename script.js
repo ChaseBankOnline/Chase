@@ -13,14 +13,13 @@
   // Normalize helper (used for bank/account comparisons)
   const normalizeKey = (s) => (s || "").toString().replace(/[^0-9A-Z]/gi, "").toUpperCase();
 
-  // Defer redirects and most logic until DOM is ready to avoid redirect loops / premature navigation
-  document.addEventListener("DOMContentLoaded", () => {
-    // Redirect to login if trying to access dashboard while not logged in
-    if (window.location.pathname.endsWith("dashboard.html") && !localStorage.getItem("loggedIn")) {
-      window.location.href = "index.html";
-      return;
-    }
+  // Redirect to login if trying to access dashboard while not logged in
+  if (window.location.pathname.endsWith("dashboard.html") && !localStorage.getItem("loggedIn")) {
+    window.location.href = "index.html";
+    return;
+  }
 
+  document.addEventListener("DOMContentLoaded", () => {
     // ===== DEMO USER (do NOT store secrets in localStorage) =====
     // For demo purposes we keep non-sensitive profile in localStorage.
     // Password and PIN are kept in-memory in this script only (not persisted).
@@ -43,57 +42,57 @@
     };
 
     // ===== INITIAL TRANSACTIONS =====
-    let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
+let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
 
-    // Only add these defaults if there are no transactions at all
-    if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
-      savedTransactions = [
-        { 
-          id: 100001,
-          ref: "REF100001", 
-          type: "expense", 
-          text: "Netflix — Entertainment", 
-          amount: "$150.00", 
-          date: "2026-01-05T05:25:00",
-          recipient: "Netflix, Inc.", 
-          account: "Charlesweahh@gmail.com", 
-          bank: "Charles", 
-          note: "" 
-        },
-        { 
-          id: 100002,
-          ref: "REF100002", 
-          type: "expense", 
-          text: "Interior — Blessed", 
-          amount: "$69,000.00", 
-          date: "2026-01-09T01:11:25",
-          recipient: "Studio O+A, Inc.", 
-          account: "28064922651", 
-          bank: "BOA", 
-          note: "" 
-        },
-        {
-          id: 100811,
-          ref: "REF2026023",
-          type: "income",
-          text: "Profit distribution from interior design & furniture investment",
-          amount: "$500,000.00",
-          date: "2026-01-23T10:30:00",
-          status: "completed",
-          recipient: "Charles Williams",
-          account: "21908488433",
-          bank: "JP Morgan Chase Bank",
-          senderName: "Johnny Adams",
-          senderAccount: "15623948807",
-          senderBank: "Wells Fargo",
-          note: ""
-        }
-      ];
-
-      // Save hard-coded transactions to localStorage
-      localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+// Only add these defaults if there are no transactions at all
+if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
+  savedTransactions = [
+    { 
+      id: 100001,
+      ref: "REF100001", 
+      type: "expense", 
+      text: "Netflix — Entertainment", 
+      amount: "$150.00", 
+      date: "2026-01-05T05:25:00",
+      recipient: "Netflix, Inc.", 
+      account: "Charlesweahh@gmail.com", 
+      bank: "Charles", 
+      note: "" 
+    },
+    { 
+      id: 100002,
+      ref: "REF100002", 
+      type: "expense", 
+      text: "Interior — Blessed", 
+      amount: "$69,000.00", 
+      date: "2026-01-09T01:11:25",
+      recipient: "Studio O+A, Inc.", 
+      account: "28064922651", 
+      bank: "BOA", 
+      note: "" 
+    },
+    {
+      id: 100811,
+      ref: "REF2026023",
+      type: "income",
+      text: "Profit distribution from interior design & furniture investment",
+      amount: "$500,000.00",
+      date: "2026-01-23T10:30:00",
+      status: "completed",
+      recipient: "Charles Williams",
+      account: "21908488433",
+      bank: "JP Morgan Chase Bank",
+      senderName: "Johnny Adams",
+      senderAccount: "15623948807",
+      senderBank: "Wells Fargo",
+      note: ""
     }
-          
+  ];
+
+  // Save hard-coded transactions to localStorage
+  localStorage.setItem("transactions", JSON.stringify(savedTransactions));
+}
+      
     // Normalize loaded transaction amounts to numbers (avoid mixed types)
     savedTransactions = savedTransactions.map(tx => {
       const amt = parseAmount(tx.amount);
@@ -110,61 +109,66 @@
     }
 
     // Helper: compute total across accounts (single source of truth)
-    function computeTotalFromAccounts(accs) {
-      if (!accs || typeof accs !== "object") return 0;
-      return Object.values(accs).reduce((sum, a) => {
+    function computeTotalFromAccounts(accts) {
+      if (!accts || typeof accts !== "object") return 0;
+      return Object.values(accts).reduce((sum, a) => {
         const b = a && a.balance ? parseFloat(a.balance) : 0;
         return sum + (isNaN(b) ? 0 : b);
       }, 0);
     }
     
-    // ===== ACCOUNTS & TOTAL BALANCE =====
-    const balanceEl = document.querySelector(".balance");
-    const checkingBalanceEl = $("checking-balance");
-    const investmentBalanceEl = $("investment-balance");
 
-    // Load accounts
-    let accounts;
-    try {
-      accounts = JSON.parse(localStorage.getItem("accounts"));
-    } catch {
-      accounts = null;
+// ===== ACCOUNTS & TOTAL BALANCE =====
+const balanceEl = document.querySelector(".balance");
+const checkingBalanceEl = $("checking-balance");
+const investmentBalanceEl = $("investment-balance");
+
+// Load accounts
+let accounts;
+try {
+  accounts = JSON.parse(localStorage.getItem("accounts"));
+} catch {
+  accounts = null;
+}
+
+// INITIALIZE ON FIRST LOAD ONLY
+if (!accounts || typeof accounts !== "object") {
+  accounts = {
+    checking: {
+      id: "CHK-0001",
+      name: "Primary Checking",
+      balance: 250000
+    },
+    investment: {
+      id: "INV-0001",
+      name: "Investment Account",
+      balance: 1500450.50
     }
+  };
+  localStorage.setItem("accounts", JSON.stringify(accounts));
+}
 
-    // INITIALIZE ON FIRST LOAD ONLY
-    if (!accounts || typeof accounts !== "object") {
-      accounts = {
-        checking: {
-          id: "CHK-0001",
-          name: "Primary Checking",
-          balance: 250000
-        },
-        investment: {
-          id: "INV-0001",
-          name: "Investment Account",
-          balance: 1500450.50
-        }
-      };
-      localStorage.setItem("accounts", JSON.stringify(accounts));
-    }
+// Always compute total from accounts (single source of truth)
+function computeTotalFromAccounts(accs) {
+  return Object.values(accs).reduce((sum, acc) => {
+    const b = parseFloat(acc.balance);
+    return sum + (isNaN(b) ? 0 : b);
+  }, 0);
+}
 
-    // Maintain a totalBalance variable (computed from accounts)
-    let totalBalance = computeTotalFromAccounts(accounts);
+// Update UI + persist
+function updateBalancesUI() {
+  const totalBalance = computeTotalFromAccounts(accounts);
 
-    // Update UI + persist
-    function updateBalancesUI() {
-      const total = computeTotalFromAccounts(accounts);
-      totalBalance = total;
+  if (balanceEl) balanceEl.textContent = formatCurrency(totalBalance);
+  if (checkingBalanceEl) checkingBalanceEl.textContent = formatCurrency(accounts.checking.balance);
+  if (investmentBalanceEl) investmentBalanceEl.textContent = formatCurrency(accounts.investment.balance);
 
-      if (balanceEl) balanceEl.textContent = formatCurrency(total);
-      if (checkingBalanceEl) checkingBalanceEl.textContent = formatCurrency(accounts.checking.balance);
-      if (investmentBalanceEl) investmentBalanceEl.textContent = formatCurrency(accounts.investment.balance);
+  localStorage.setItem("accounts", JSON.stringify(accounts));
+  localStorage.setItem("totalBalance", String(totalBalance));
+}
 
-      localStorage.setItem("accounts", JSON.stringify(accounts));
-      localStorage.setItem("totalBalance", String(total));
-    }
-
-    updateBalancesUI();
+updateBalancesUI();
 
     // Centralized transaction creation and saving (kept later in script)
     // Note: earlier duplicate simple processTransaction removed to avoid conflicts.
@@ -173,12 +177,7 @@
     const loginForm = $("login-form");
     const messageEl = $("login-message");
     if (loginForm) {
-      // Avoid double-binding: replace with a clone to remove previous listeners if script reloaded
-      const clone = loginForm.cloneNode(true);
-      loginForm.parentNode.replaceChild(clone, loginForm);
-
-      const newLoginForm = $("login-form");
-      newLoginForm.addEventListener("submit", e => {
+      loginForm.addEventListener("submit", e => {
         e.preventDefault();
         const username = ($("username") ? $("username").value : "").trim();
         const password = ($("password") ? $("password").value : "");
@@ -197,11 +196,8 @@
         }
 
         setTimeout(() => {
-          // Demo uses fullName as username (intentional for demo). Also allow email to improve UX.
-          const validUsernames = [demoUser.fullName, demoUser.email].map(s => (s || "").toString().trim());
-          const isUsernameMatch = validUsernames.includes(username);
-
-          if (isUsernameMatch && password === demoUser.password) {
+          // Demo uses fullName as username (intentional for demo). Keep check strict.
+          if (username === demoUser.fullName && password === demoUser.password) {
             localStorage.setItem("loggedIn", "true");
             if (messageEl) {
               messageEl.style.color = "green";
@@ -218,7 +214,7 @@
       });
     }
 
-    // ===== AUTO REDIRECT IF ALREADY LOGGED IN (when on index.html) =====
+    // ===== AUTO REDIRECT IF ALREADY LOGGED IN =====
     if (localStorage.getItem("loggedIn") && window.location.pathname.endsWith("index.html")) {
       window.location.href = "dashboard.html";
       return;
@@ -249,9 +245,9 @@
 
         // Only the amount (right span) is colored
         if (tx.type === "income") {
-          right.style.color = "green";   // green only for income amount
+        right.style.color = "green";   // green only for income amount
         } else if (tx.type === "expense") {
-          right.style.color = "red";     // red only for expense amount
+        right.style.color = "red";     // red only for expense amount
         }
 
         li.appendChild(right); // append the amount span
@@ -395,23 +391,19 @@
       totalBalance = computeTotalFromAccounts(accounts);
 
       const txObj = {
-      id: Math.floor(Math.random() * 1000000),
-      ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
-      type: txProps.type || "income",
-      text: txProps.text || "",
-      amount: numericAmt,
-      date: new Date().toISOString(),
-      status: txProps.status || "completed",
-      recipient: txProps.recipient || "",
-      account: txProps.account || "",
-      bank: txProps.bank || "",
-      note: txProps.note || "",
+        id: Math.floor(Math.random() * 1000000),
+        ref: "REF" + Math.floor(100000000 + Math.random() * 900000000),
+        type: txProps.type || "income",
+        text: txProps.text || "",
+        amount: numericAmt,
+        date: new Date().toISOString(),
+        status: txProps.status || "completed",
+        recipient: txProps.recipient || "",
+        account: txProps.account || "",
+        bank: txProps.bank || "",
+        note: txProps.note || ""
+      };
 
-      // ADD THESE LINES:
-      senderName: txProps.senderName || "",
-      senderAccount: txProps.senderAccount || "",
-      senderBank: txProps.senderBank || ""
-     };
       savedTransactions.unshift(txObj);
       saveTransactionsAndBalance();
       renderTransactions();
@@ -425,52 +417,58 @@
       return txObj;
     }
 
-     function showTransactionReceipt(tx) {
-  const successModal = $("success-modal");
-  if (!successModal || !tx) return;
+    function showTransactionReceipt(tx) {
+      const successModal = $("success-modal");
+      if (!successModal || !tx) return;
 
-  // Show modal
-  successModal.style.display = "flex";
-  successModal.style.position = "fixed";
-  successModal.style.top = "50%";
-  successModal.style.left = "50%";
-  successModal.style.transform = "translate(-50%, -50%)";
-  successModal.style.zIndex = 2000;
+      // Show modal with proper styling
+      successModal.style.display = "flex";
+      successModal.style.position = "fixed";
+      successModal.style.top = "50%";
+      successModal.style.left = "50%";
+      successModal.style.transform = "translate(-50%, -50%)";
+      successModal.style.zIndex = 2000;
 
-  const now = new Date(tx.date ? tx.date : Date.now());
+      // Fill modal with transaction info (guard each element)
+      const rid = $("r-id"); 
+      if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
 
-  // Fill modal fields safely
-  const rid = $("r-id"); if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
-  const rref = $("r-ref"); if (rref) rref.textContent = tx.ref ?? "REF" + Math.floor(100000000 + Math.random() * 900000000);
-  const rdate = $("r-date"); if (rdate) rdate.textContent = now.toLocaleDateString();
-  const rtime = $("r-time"); if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
-  const ramount = $("r-amount"); if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
-  const rfee = $("r-fee"); if (rfee) rfee.textContent = "0.00";
+      const rref = $("r-ref"); 
+      if (rref) rref.textContent = tx.ref ?? "REF" + Math.floor(100000000 + Math.random() * 900000000);
+      const now = new Date(tx.date ? tx.date : Date.now());
+      const rdate = $("r-date"); if (rdate) rdate.textContent = now.toLocaleDateString();
+      const rtime = $("r-time"); if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
 
-  // Sender & Recipient
-const rsender = $("r-sender");
-if (rsender) {
-  const senderName = tx.senderName || "N/A";
-  const senderAccount = tx.senderAccount || "N/A";
-  const senderBank = tx.senderBank || "N/A"; // will show Wells Fargo if present
-  rsender.textContent = `${senderName} — ${senderAccount} (${senderBank})`;
-}
+      const ramount = $("r-amount"); if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
+      const rfee = $("r-fee"); if (rfee) rfee.textContent = "0.00";
 
-const rrecipient = $("r-recipient");
-if (rrecipient) {
-  const recipientName = tx.recipient || "N/A";
-  const recipientAccount = tx.account || "N/A";
-  const recipientBank = tx.bank || "N/A";
-  rrecipient.textContent = `${recipientName} — ${recipientAccount} (${recipientBank})`;
-}
+      const rrecipient = $("r-recipient");
+      const rname = $("r-name");
 
-const modalHeading = successModal.querySelector("h2");
-if (modalHeading) {
-  modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
-}
+      // For income transactions show sender details (From)
+      if (tx.type === "income" && (tx.senderName || tx.senderAccount || tx.senderBank)) {
+        // Prefer showing sender information
+        if (rrecipient) rrecipient.textContent = `${tx.senderName || "[Sender Name]"} — ${tx.senderAccount || "[Account]"} (${tx.senderBank || "[Bank]"})`;
+        if (rname) rname.textContent = tx.senderName || tx.recipient || tx.text || "[Name]";
+      } else {
+        // Default behavior: show recipient / beneficiary
+        if (tx.account || tx.bank) {
+          if (rrecipient) rrecipient.textContent = `${tx.recipient || "[Name]"} — ${tx.account || "[Account]"} (${tx.bank || "[Bank]"})`;
+          if (rname) rname.textContent = tx.recipient || "[Name]";
+        } else {
+          if (rrecipient) rrecipient.textContent = tx.recipient || tx.text || "[Name]";
+          if (rname) rname.textContent = tx.recipient || tx.text || "[Name]";
+        }
+      }
 
-// Save globally for PDF
-window.lastTransactionDetails = tx;
+      const modalHeading = successModal.querySelector("h2");
+      if (modalHeading) {
+        modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
+      }
+
+      // Save globally for download (demo convenience)
+      window.lastTransactionDetails = tx;
+    }
 
     // Get confirm modal elements (may be missing in some pages)
     const confirmModal = $("confirm-modal");
@@ -922,7 +920,37 @@ window.lastTransactionDetails = tx;
         const time = $("r-time") ? $("r-time").textContent : (new Date().toLocaleTimeString("en-US", { hour12: false }) + " — UTC");
         const amount = $("r-amount") ? $("r-amount").textContent : formatCurrency(parseAmount(details.amount) || 0);
         const fee = $("r-fee") ? $("r-fee").textContent : "0.00";
-        const recipient = $("r-recipient") ? $("r-recipient").textContent : (details.recipient ? `${details.recipient} — ${details.account || ""} (${details.bank || "N/A"})` : "[Insert Beneficiary Name / Account Details]");
+
+        // Build From / To account information explicitly to avoid confusion.
+        // For incoming transactions prefer sender fields; for expenses prefer bank/account on the transaction.
+        let fromAccountLine = "JPMorgan Chase Bank, N.A. (****8433)"; // default fallback
+        let toAccountLine = details.recipient ? `${details.recipient} — ${details.account || ""} (${details.bank || "N/A"})` : "[Insert Beneficiary Name / Account Details]";
+
+        // If this transaction has sender information (income), show sender as the FROM account.
+        if (details.type === "income" && (details.senderBank || details.senderAccount || details.senderName)) {
+          const senderBank = details.senderBank || "Unknown Bank";
+          const senderName = details.senderName || "";
+          const senderAccount = details.senderAccount || details.senderAccount || "";
+          // Mask sender account for privacy (show last 4 if available)
+          let maskedSenderAccount = senderAccount;
+          try {
+            const acctStr = String(senderAccount || "");
+            if (acctStr.length >= 4) maskedSenderAccount = "****" + acctStr.slice(-4);
+            else maskedSenderAccount = acctStr;
+          } catch (e) { maskedSenderAccount = senderAccount; }
+
+          fromAccountLine = `${senderBank} — ${senderName} (${maskedSenderAccount})`;
+
+          // To account should be the recipient in our system
+          toAccountLine = details.recipient ? `${details.recipient} — ${details.account || ""} (${details.bank || "N/A"})` : toAccountLine;
+        } else {
+          // For non-income transactions, use the transaction's bank/account as the TO account 
+          // and keep the default FROM as the bank that holds the user's checking account (fallback).
+          if (details.bank || details.account) {
+            toAccountLine = `${details.recipient || ""} — ${details.account || ""} (${details.bank || ""})`;
+          }
+          // Optionally, you could try to use accounts.checking info for FROM, but keep the original fallback for demo.
+        }
 
         // PDF styling
         let y = 20; // vertical position start
@@ -934,7 +962,8 @@ window.lastTransactionDetails = tx;
           doc.addImage(logo, "PNG", 20, 12, 35, 12);
         } catch (e) { /* ignore missing logo */ }
 
-        // Watermark
+        // Watermark / Header: use a dynamic bank title if senderBank available
+        const bankTitle = (details.type === "income" && details.senderBank) ? String(details.senderBank).toUpperCase() : "JPMORGAN CHASE BANK";
         doc.setTextColor(220);
         doc.setFontSize(40);
         doc.text("CONFIDENTIAL", 105, 150, {
@@ -943,7 +972,7 @@ window.lastTransactionDetails = tx;
         });
         doc.setTextColor(0); // reset color
         doc.setFontSize(18);
-        doc.text("JPMORGAN CHASE BANK", 105, y, { align: "center" });
+        doc.text(bankTitle, 105, y, { align: "center" });
         y += 8;
 
         doc.setFontSize(14);
@@ -967,24 +996,14 @@ window.lastTransactionDetails = tx;
         doc.text(`Payment Amount: ${amount}`, 20, y); y += 8;
         doc.text(`Transaction Fee: ${fee}`, 20, y); y += 8;
 
-         // Account Info
-         doc.setFontSize(14); 
-         doc.text("Account Information", 20, y); 
-         y += 8;
+        // Account Info
+        doc.setFontSize(14); doc.text("Account Information", 20, y); y += 8;
+        doc.setFontSize(12);
+        doc.text(`From Account: ${fromAccountLine}`, 20, y); y += 8;
+        doc.text("SWIFT / BIC: CHASUS33", 20, y); y += 8;
 
-         doc.setFontSize(12);
-
-         // Use dynamic sender info from details
-         doc.text(`From Account: ${details.senderName || "Sender Name"} — ${details.senderAccount || "XXXXXXX"} (${details.senderBank || "Bank Name"})`, 20, y); 
-         y += 8;
-
-         // Optional: add SWIFT/BIC dynamically if you have it in details
-         doc.text(`SWIFT / BIC: ${details.senderBIC || "N/A"}`, 20, y); 
-         y += 8;
-
-        // Recipient info
-        doc.text(`To Account: ${details.recipient || "Recipient Name"} — ${details.account || "XXXXXXX"} (${details.bank || "Bank Name"})`, 20, y); 
-         y += 12;
+        doc.text(`To Account: ${toAccountLine}`, 20, y);
+        y += 12;
 
         // Authorization Statement
         doc.setFontSize(14); doc.text("Authorization Statement", 20, y); y += 8;
