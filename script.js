@@ -480,8 +480,7 @@ updateBalancesUI();
       }
 
       // Show the sender's name prominently (Johnny Adams for your example).
-      if (rname) rname.textContent = tx.senderName || tx.recipient || "N/A";
-
+      if (rname) rname.textContent = tx.recipient || tx.senderName || "N/A";
     } else if (tx.type === "expense") {
       // FROM: always show the user's bank (per your request)
       if (rSenderBank) rSenderBank.textContent = "JPMorgan Chase Bank";
