@@ -417,70 +417,74 @@ updateBalancesUI();
       return txObj;
     }
 
-    function showTransactionReceipt(tx) {
-      const successModal = $("success-modal");
-      if (!successModal || !tx) return;
+      function showTransactionReceipt(tx) {
+  const successModal = $("success-modal");
+  if (!successModal || !tx) return;
 
-      // Show modal with proper styling
-      successModal.style.display = "flex";
-      successModal.style.position = "fixed";
-      successModal.style.top = "50%";
-      successModal.style.left = "50%";
-      successModal.style.transform = "translate(-50%, -50%)";
-      successModal.style.zIndex = 2000;
+  // Show modal with proper styling
+  successModal.style.display = "flex";
+  successModal.style.position = "fixed";
+  successModal.style.top = "50%";
+  successModal.style.left = "50%";
+  successModal.style.transform = "translate(-50%, -50%)";
+  successModal.style.zIndex = 2000;
 
-      // Fill modal with transaction info (guard each element)
-      const rid = $("r-id"); 
-      if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
+  // Get modal elements
+  const rid = $("r-id");
+  const rref = $("r-ref");
+  const rdate = $("r-date");
+  const rtime = $("r-time");
+  const ramount = $("r-amount");
+  const rfee = $("r-fee");
+  const rsender = $("r-sender");     // Added missing sender element
+  const rrecipient = $("r-recipient");
+  const rname = $("r-name");
 
-      const rref = $("r-ref"); 
-      if (rref) rref.textContent = tx.ref ?? "REF" + Math.floor(100000000 + Math.random() * 900000000);
-      const now = new Date(tx.date ? tx.date : Date.now());
-      const rdate = $("r-date"); if (rdate) rdate.textContent = now.toLocaleDateString();
-      const rtime = $("r-time"); if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+  // Fill modal with transaction info
+  if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
+  if (rref) rref.textContent = tx.ref ?? "REF" + Math.floor(100000000 + Math.random() * 900000000);
+  const now = new Date(tx.date ? tx.date : Date.now());
+  if (rdate) rdate.textContent = now.toLocaleDateString();
+  if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+  if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
+  if (rfee) rfee.textContent = "0.00";
 
-      const ramount = $("r-amount"); if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
-      const rfee = $("r-fee"); if (rfee) rfee.textContent = "0.00";
+  if (tx.type === "income") {
+    // FROM: external sender
+    if (rsender) {
+      rsender.textContent =
+        `${tx.senderBank || "N/A"} — ${tx.senderName || "N/A"} (****${tx.senderAccount?.slice(-4) || "N/A"})`;
+    }
 
-      const rrecipient = $("r-recipient");
-      const rname = $("r-name");
+    // TO: your account
+    if (rrecipient) {
+      rrecipient.textContent =
+        `Your Account — ${tx.bank || "N/A"} (****${tx.account?.slice(-4) || "N/A"})`;
+    }
 
-       if (tx.type === "income") {
+    if (rname) {
+      rname.textContent = tx.senderName || "Income Transaction";
+    }
 
-  // FROM: external sender
-  if (rsender) {
-    rsender.textContent =
-      `${tx.senderName || "N/A"} (****${tx.senderAccount?.slice(-4) || "N/A"})`;
+  } else {
+    // Expense transaction
+
+    // FROM: your account
+    if (rsender) {
+      rsender.textContent =
+        `Your Account — ${tx.bank || "N/A"} (****${tx.account?.slice(-4) || "N/A"})`;
+    }
+
+    // TO: external recipient
+    if (rrecipient) {
+      rrecipient.textContent =
+        `${tx.recipientBank || "N/A"} — ${tx.recipient || "N/A"} (****${tx.recipientAccount?.slice(-4) || "N/A"})`;
+    }
+
+    if (rname) {
+      rname.textContent = tx.recipient || "Expense Transaction";
+    }
   }
-
-  // TO: your account (JP Morgan)
-  if (rrecipient) {
-    rrecipient.textContent =
-      `Your Account — ${tx.bank} (****${tx.account?.slice(-4) || "N/A"})`;
-  }
-
-  if (rname) {
-    rname.textContent = tx.senderName || "Income Transaction";
-  }
-
-} else {
-
-  // FROM: your account
-  if (rsender) {
-    rsender.textContent =
-      `Your Account — ${tx.bank} (****${tx.account?.slice(-4) || "N/A"})`;
-  }
-
-  // TO: external recipient
-  if (rrecipient) {
-    rrecipient.textContent =
-      `${tx.recipient || "N/A"} (****${tx.account?.slice(-4) || "N/A"})`;
-  }
-
-  if (rname) {
-    rname.textContent = tx.recipient || "Expense Transaction";
-  }
-}
     
       const modalHeading = successModal.querySelector("h2");
       if (modalHeading) {
