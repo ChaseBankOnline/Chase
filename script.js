@@ -417,11 +417,11 @@ updateBalancesUI();
       return txObj;
     }
 
-      function showTransactionReceipt(tx) {
-  const successModal = $("success-modal");
+  function showTransactionReceipt(tx) {
+  const successModal = document.getElementById("success-modal");
   if (!successModal || !tx) return;
 
-  // Show modal with proper styling
+  // Show modal
   successModal.style.display = "flex";
   successModal.style.position = "fixed";
   successModal.style.top = "50%";
@@ -429,16 +429,18 @@ updateBalancesUI();
   successModal.style.transform = "translate(-50%, -50%)";
   successModal.style.zIndex = 2000;
 
-  // Get modal elements
-  const rid = $("r-id");
-  const rref = $("r-ref");
-  const rdate = $("r-date");
-  const rtime = $("r-time");
-  const ramount = $("r-amount");
-  const rfee = $("r-fee");
-  const rsender = $("r-sender");     
-  const rrecipient = $("r-recipient");
-  const rname = $("r-name");
+  // Receipt Elements
+  const rid = document.getElementById("r-id");
+  const rref = document.getElementById("r-ref");
+  const rdate = document.getElementById("r-date");
+  const rtime = document.getElementById("r-time");
+  const ramount = document.getElementById("r-amount");
+  const rfee = document.getElementById("r-fee");
+  const rSenderBank = document.getElementById("r-sender-bank");
+  const rSenderAccount = document.getElementById("r-sender-account");
+  const rRecipientBank = document.getElementById("r-recipient-bank");
+  const rRecipientAccount = document.getElementById("r-recipient-account");
+  const rname = document.getElementById("r-name");
 
   // Fill modal with transaction info
   if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
@@ -446,34 +448,52 @@ updateBalancesUI();
   const now = new Date(tx.date || Date.now());
   if (rdate) rdate.textContent = now.toLocaleDateString();
   if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
-  if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
+  if (ramount) ramount.textContent = "$" + Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (rfee) rfee.textContent = "0.00";
 
-   if (tx.type === "income") {
-  // FROM: sender bank (optionally masked account)
-  if (rsender) {
-    const senderBank = tx.senderBank || "N/A";
-    rsender.textContent = senderBank;
+  // ===== Account Information =====
+  if (tx.type === "income") {
+    // FROM: sender
+    if (rSenderBank) rSenderBank.textContent = tx.senderBank || "N/A";
+    if (rSenderAccount) {
+      const acct = tx.senderAccount ? "****" + String(tx.senderAccount).slice(-4) : "N/A";
+      rSenderAccount.textContent = acct;
+    }
+
+    // TO: recipient (your account)
+    if (rRecipientBank) rRecipientBank.textContent = tx.bank || "N/A";
+    if (rRecipientAccount) {
+      const acct = tx.account ? "****" + String(tx.account).slice(-4) : "N/A";
+      rRecipientAccount.textContent = acct;
+    }
+
+    if (rname) rname.textContent = tx.recipient || "N/A";
+
+  } else if (tx.type === "expense") {
+    // FROM: your account
+    if (rSenderBank) rSenderBank.textContent = tx.bank || "N/A";
+    if (rSenderAccount) {
+      const acct = tx.account ? "****" + String(tx.account).slice(-4) : "N/A";
+      rSenderAccount.textContent = acct;
+    }
+
+    // TO: recipient
+    if (rRecipientBank) rRecipientBank.textContent = tx.bank || "N/A";
+    if (rRecipientAccount) {
+      const acct = tx.account ? "****" + String(tx.account).slice(-4) : "N/A";
+      rRecipientAccount.textContent = acct;
+    }
+
+    if (rname) rname.textContent = tx.recipient || "N/A";
   }
 
-  // TO: your account with name, bank, and last 4 digits
-  if (rrecipient) {
-    const maskedAccount = tx.account ? "****" + String(tx.account).slice(-4) : "N/A";
-    rrecipient.textContent = `${demoUser.fullName} — ${tx.bank || "N/A"} (${maskedAccount})`;
-  }
-
-  // Recipient Name: your name
-  if (rname) {
-    rname.textContent = demoUser.fullName;
-  }
-}
-
+  // Modal heading
   const modalHeading = successModal.querySelector("h2");
   if (modalHeading) {
     modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
   }
 
-  // Save globally for download convenience
+  // Save globally for PDF or download
   window.lastTransactionDetails = tx;
 }
       
