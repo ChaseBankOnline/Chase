@@ -47,47 +47,56 @@ let savedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
 // Only add these defaults if there are no transactions at all
 if (!Array.isArray(savedTransactions) || savedTransactions.length === 0) {
   savedTransactions = [
-    { 
-      id: 100001,
-      ref: "REF100001", 
-      type: "expense", 
-      text: "Netflix — Entertainment", 
-      amount: "$150.00", 
-      date: "2026-01-05T05:25:00",
-      recipient: "Netflix, Inc.", 
-      account: "Charlesweahh@gmail.com", 
-      bank: "Charles", 
-      note: "" 
-    },
-    { 
-      id: 100002,
-      ref: "REF100002", 
-      type: "expense", 
-      text: "Interior — Blessed", 
-      amount: "$69,000.00", 
-      date: "2026-01-09T01:11:25",
-      recipient: "Studio O+A, Inc.", 
-      account: "28064922651", 
-      bank: "BOA", 
-      note: "" 
-    },
-    {
-      id: 100811,
-      ref: "REF2026023",
-      type: "income",
-      text: "Profit distribution from interior design & furniture investment",
-      amount: "$500,000.00",
-      date: "2026-01-23T10:30:00",
-      status: "completed",
-      recipient: "Charles Williams",
-      account: "21908488433",
-      bank: "JP Morgan Chase Bank",
-      senderName: "Johnny Adams",
-      senderAccount: "15623948807",
-      senderBank: "Wells Fargo",
-      note: ""
-    }
-  ];
+  { 
+    id: 100001,
+    ref: "REF100001", 
+    type: "expense", 
+    text: "Netflix — Entertainment", 
+    amount: "$150.00", 
+    date: "2026-01-05T05:25:00",
+    recipient: "Netflix, Inc.", 
+    account: "Charlesweahh@gmail.com", 
+    bank: "Charles",
+    note: "",
+    // Income-specific fields left empty for expenses
+    senderName: "",
+    senderAccount: "(****8433)",
+    senderBank: "JPMorgan Chase Bank",
+    status: "completed"  // always good to have for consistency
+  },
+  { 
+    id: 100002,
+    ref: "REF100002", 
+    type: "expense", 
+    text: "Interior — Blessed", 
+    amount: "$69,000.00", 
+    date: "2026-01-09T01:11:25",
+    recipient: "Studio O+A, Inc.", 
+    account: "28064922651", 
+    bank: "Bank OF America",
+    note: "",
+    senderName: "Charles Williams",
+    senderAccount: "(****8433)",
+    senderBank: "JPMorgan Chase Bank",
+    status: "completed"
+  },
+  {
+    id: 100811,
+    ref: "REF2026023",
+    type: "income",
+    text: "Profit distribution from interior design & furniture investment",
+    amount: "$500,000.00",
+    date: "2026-01-23T10:30:00",
+    status: "completed",
+    recipient: "Charles Williams",
+    account: "21908488433",
+    bank: "JP Morgan Chase Bank",
+    senderName: "Johnny Adams",
+    senderAccount: "15623948807",
+    senderBank: "Wells Fargo",
+    note: ""
+  }
+];
 
   // Save hard-coded transactions to localStorage
   localStorage.setItem("transactions", JSON.stringify(savedTransactions));
