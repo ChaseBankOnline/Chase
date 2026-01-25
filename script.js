@@ -1,12 +1,3 @@
-// Complete merged and fixed application script
-// Fixes applied:
-// - Moved redirect checks into DOMContentLoaded to avoid premature navigation/refresh loops.
-// - Ensured login accepts demo user's fullName OR email.
-// - Prevented double-binding on the login form by replacing with a clone before attaching listener.
-// - Removed duplicate computeTotalFromAccounts definition (kept logic intact).
-// - Declared totalBalance to avoid accidental global variable creation.
-// All transaction/balance computation logic preserved exactly as in the original, aside from the small safety/structure edits above.
-
 (function () {
   // Helper
   const $ = id => document.getElementById(id);
@@ -1105,5 +1096,5 @@ window.lastTransactionDetails = tx;
     if (editProfileBtn) editProfileBtn.addEventListener("click", () => window.location.href = "profile.html");
     if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
     
-  }); // end DOMContentLoaded
-})(); // end IIFE
+  });
+})();
