@@ -436,14 +436,14 @@ updateBalancesUI();
   const rtime = $("r-time");
   const ramount = $("r-amount");
   const rfee = $("r-fee");
-  const rsender = $("r-sender");     // Added missing sender element
+  const rsender = $("r-sender");     
   const rrecipient = $("r-recipient");
   const rname = $("r-name");
 
   // Fill modal with transaction info
   if (rid) rid.textContent = tx.id ?? Math.floor(Math.random() * 1000000);
   if (rref) rref.textContent = tx.ref ?? "REF" + Math.floor(100000000 + Math.random() * 900000000);
-  const now = new Date(tx.date ? tx.date : Date.now());
+  const now = new Date(tx.date || Date.now());
   if (rdate) rdate.textContent = now.toLocaleDateString();
   if (rtime) rtime.textContent = now.toLocaleTimeString('en-US', { hour12: false });
   if (ramount) ramount.textContent = formatCurrency(parseAmount(tx.amount) || 0);
@@ -452,14 +452,14 @@ updateBalancesUI();
   if (tx.type === "income") {
     // FROM: external sender
     if (rsender) {
-      rsender.textContent =
-        `${tx.senderBank || "N/A"} — ${tx.senderName || "N/A"} (****${tx.senderAccount?.slice(-4) || "N/A"})`;
+      const maskedSenderAccount = tx.senderAccount ? "****" + String(tx.senderAccount).slice(-4) : "N/A";
+      rsender.textContent = `${tx.senderBank || "N/A"} — ${tx.senderName || "N/A"} (${maskedSenderAccount})`;
     }
 
     // TO: your account
     if (rrecipient) {
-      rrecipient.textContent =
-        `Your Account — ${tx.bank || "N/A"} (****${tx.account?.slice(-4) || "N/A"})`;
+      const maskedAccount = tx.account ? "****" + String(tx.account).slice(-4) : "N/A";
+      rrecipient.textContent = `Your Account — ${tx.bank || "N/A"} (${maskedAccount})`;
     }
 
     if (rname) {
@@ -471,29 +471,30 @@ updateBalancesUI();
 
     // FROM: your account
     if (rsender) {
-      rsender.textContent =
-        `Your Account — ${tx.bank || "N/A"} (****${tx.account?.slice(-4) || "N/A"})`;
+      const maskedAccount = tx.account ? "****" + String(tx.account).slice(-4) : "N/A";
+      rsender.textContent = `Your Account — ${tx.bank || "N/A"} (${maskedAccount})`;
     }
 
     // TO: external recipient
     if (rrecipient) {
-      rrecipient.textContent =
-        `${tx.recipientBank || "N/A"} — ${tx.recipient || "N/A"} (****${tx.recipientAccount?.slice(-4) || "N/A"})`;
+      const maskedRecipientAccount = tx.recipientAccount ? "****" + String(tx.recipientAccount).slice(-4) : "N/A";
+      rrecipient.textContent = `${tx.recipientBank || "N/A"} — ${tx.recipient || "N/A"} (${maskedRecipientAccount})`;
     }
 
     if (rname) {
       rname.textContent = tx.recipient || "Expense Transaction";
     }
   }
-    
-      const modalHeading = successModal.querySelector("h2");
-      if (modalHeading) {
-        modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
-      }
 
-      // Save globally for download (demo convenience)
-      window.lastTransactionDetails = tx;
-    }
+  const modalHeading = successModal.querySelector("h2");
+  if (modalHeading) {
+    modalHeading.textContent = tx.status === "pending" ? "Transaction Pending ⏳" : "Transaction Successful ✔";
+  }
+
+  // Save globally for download convenience
+  window.lastTransactionDetails = tx;
+}
+      
 
     // Get confirm modal elements (may be missing in some pages)
     const confirmModal = $("confirm-modal");
