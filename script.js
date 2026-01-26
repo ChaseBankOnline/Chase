@@ -75,11 +75,6 @@
     console.warn("Could not fetch IP location:", e);
   }
 }
-
- <div class="user-session">
-  <span id="user-location">Loading location...</span> |
-  <span id="user-time">Loading time...</span>
-</div>
                             
 fetchUserLocation();
     
