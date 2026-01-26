@@ -911,10 +911,17 @@ li span.description {
   margin: 2px 0;          /* Small margin between lines */
 }
 
-.security-note {
-  font-size: 0.85rem;       /* slightly smaller */
-  color: #555;              /* gray, professional */
-  text-align: center;       /* centered under navbar or wherever */
-  margin: 5px 0 15px 0;     /* spacing from navbar / content */
-  font-style: italic;       /* optional: subtle emphasis */
-}
+ .security-note {
+  display: flex;                 /* align icon and text horizontally */
+  align-items: center;           /* vertically center the emoji and text */
+  justify-content: center;       /* center on the page or container */
+  gap: 6px;                      /* space between the shield and text */
+  font-size: 0.85rem;            /* subtle, professional size */
+  color: #555;                   /* neutral gray for a professional look */
+  text-align: center;
+  margin: 8px 0 18px 0;          /* space above and below */
+  font-style: italic;            /* subtle emphasis without being bold */
+  background: rgba(0, 94, 184, 0.05); /* faint background to highlight the note */
+  padding: 6px 12px;             /* small padding for neatness */
+  border-radius: 8px;            /* rounded corners for modern feel */
+ }
