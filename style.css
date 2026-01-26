@@ -910,3 +910,11 @@ li span.description {
 .user-info p {
   margin: 2px 0;          /* Small margin between lines */
 }
+
+.security-note {
+  font-size: 0.85rem;       /* slightly smaller */
+  color: #555;              /* gray, professional */
+  text-align: center;       /* centered under navbar or wherever */
+  margin: 5px 0 15px 0;     /* spacing from navbar / content */
+  font-style: italic;       /* optional: subtle emphasis */
+}
