@@ -1050,8 +1050,9 @@ li span.description {
   }
 }
 
+/* ===== Mini card balance numbers ===== */
 .mini-card p {
-  font-size: clamp(12px, 1.2vw, 14px); /* auto-resizes for different screen widths */
+  font-size: 11px;       /* smaller than total balance number */
   font-weight: 500;
   line-height: 1.2;
   margin: 0 0 4px 0;
