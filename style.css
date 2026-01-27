@@ -926,15 +926,16 @@ li span.description {
   border-radius: 8px;            /* rounded corners for modern feel */
  }
 
-  #toggle-balance {
+#toggle-balance {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 18px;
   color: #555;
   transition: color 0.2s;
-}
-
-#toggle-balance:hover {
-  color: #003087;
+  width: 36px;   /* fixed width */
+  height: 36px;  /* fixed height */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
