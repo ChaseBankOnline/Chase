@@ -950,3 +950,26 @@ li span.description {
   width: 36px;
   height: 36px;
 }
+
+ /* Center all balances inside their cards */
+.balance-card .balance {
+  font-size: 24px;       /* adjust size if needed */
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;    /* center inside the card */
+  margin: 10px 0;        /* optional spacing */
+}
+
+/* Center mini-card balances */
+.mini-card p {
+  text-align: center;
+  font-size: 18px;       /* adjust size if needed */
+  font-weight: 600;
+  margin: 5px 0;
+}
+
+/* Center mini-card small text (optional) */
+.mini-card small {
+  display: block;
+  text-align: center;
+}
