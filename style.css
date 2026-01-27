@@ -1050,22 +1050,129 @@ li span.description {
   }
 }
 
-/* ===== Total Balance Label ===== */
-.balance-card .balance-label {
-  display: block;          /* ensures it's on its own line */
-  font-size: 16px;         /* smaller than total balance number */
-  font-weight: 500;        /* professional weight */
+/* ===== Balance Card ===== */
+.balance-card {
+  position: relative;
+  padding: 20px 16px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  width: 300px;
+  text-align: center;
+}
+
+/* ===== Total Balance Header ===== */
+.balance-card .balance-header {
+  display: flex;
+  justify-content: center;  /* center the label */
+  align-items: center;
+  position: relative;       /* allows absolute positioning for toggle button */
+  margin-bottom: 8px;       /* space between label and number */
+}
+
+/* Total Balance Label (text) */
+.balance-card .balance-header h3 {
+  font-size: 16px;
+  font-weight: 500;
   color: var(--color-muted);
-  margin: 0 auto 8px auto; /* space below the label, centered */
-  text-align: center;      /* center text above the number */
+  margin: 0;
+  text-align: center;
+}
+
+/* Toggle Balance Button */
+#toggle-balance {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  transition: transform 0.2s, filter 0.2s;
+}
+#toggle-balance:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
 /* ===== Total Balance Number ===== */
-.balance-card .balance {
-  font-size: 24px;         /* bold enough to stand out */
+#total-balance {
+  font-size: 24px;
   font-weight: 600;
   color: var(--color-primary);
-  text-align: center;      /* keep number centered */
-  margin: 0;               /* remove extra margin from before */
+  text-align: center;
+  margin: 0 0 20px 0;
   white-space: nowrap;
+}
+
+/* ===== Mini-Cards Container ===== */
+.mini-cards {
+  display: flex;
+  gap: 12px;               /* space between mini-cards */
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* ===== Individual Mini Card ===== */
+.mini-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48%;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-surface) 94%, black 0%);
+}
+
+/* Mini card label */
+.mini-card h4 {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* Mini card balance numbers (smaller than total) */
+.mini-card p {
+  font-size: 12px;  /* reduced size for both balances */
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 4px 0;
+  color: var(--color-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mini card small text */
+.mini-card small {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 400px) {
+  .balance-card {
+    width: 90%;
+    padding: 16px 12px;
+  }
+  #total-balance {
+    font-size: 20px;
+  }
+  .mini-card p {
+    font-size: 11px;  /* slightly smaller for small screens */
+  }
+  .balance-card .balance-header h3 {
+    font-size: 14px;
+  }
 }
