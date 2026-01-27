@@ -1049,3 +1049,15 @@ li span.description {
     font-size: 14px;
   }
 }
+
+.mini-card p {
+  font-size: clamp(12px, 1.2vw, 14px); /* auto-resizes for different screen widths */
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 4px 0;
+  color: var(--color-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
