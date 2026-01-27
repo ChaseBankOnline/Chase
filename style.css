@@ -934,11 +934,12 @@ li span.description {
   position: relative; /* allows absolute positioning of toggle */
 }
 
+ /* ===== Toggle Button ===== */
 #toggle-balance {
-  position: absolute; /* float the toggle to the right */
-  right: 10px;        /* distance from card edge */
+  position: absolute;
+  right: 10px;
   top: 50%;
-  transform: translateY(-50%); /* vertically center */
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
@@ -951,73 +952,58 @@ li span.description {
   height: 36px;
 }
 
- /* Center all balances inside their cards */
+/* ===== Total Balance ===== */
 .balance-card .balance {
-  font-size: 24px;       /* adjust size if needed */
-  font-weight: 700;
+  font-size: 22px;       /* slightly smaller for balance */
+  font-weight: 600;      /* less bold */
   color: var(--color-primary);
-  text-align: center;    /* center inside the card */
-  margin: 10px 0;        /* optional spacing */
-}
-
-/* Center mini-card balances */
-.mini-card p {
   text-align: center;
-  font-size: 18px;       /* adjust size if needed */
-  font-weight: 600;
-  margin: 5px 0;
+  margin: 12px 0;        /* spacing above & below */
+  white-space: nowrap;    /* prevent wrapping inside the card */
+  overflow: hidden;
+  text-overflow: ellipsis; /* shows ... if too long */
 }
 
-/* Center mini-card small text (optional) */
-.mini-card small {
-  display: block;
-  text-align: center;
-}
-
-/* Total balance (center inside card ignoring toggle) */
-.balance-card .balance {
-  font-size: 24px;        /* adjust smaller if needed */
-  font-weight: 700;
-  text-align: center;      /* center text inside the card */
-  margin: 15px 0;          /* spacing above and below */
-}
-
-/* Mini card balances (checking & investment) */
-.mini-card p {
-  font-size: 16px;         /* original size */
-  font-weight: 700;
-  text-align: center;      /* center inside mini card */
-  margin: 5px 0;
-}
-
-/* Mini card labels (optional, to match previous spacing) */
-.mini-card h4 {
-  text-align: center;
-  margin-bottom: 5px;
-}
-
-/* Ensure the toggle button does not push balance */
-.balance-header {
-  justify-content: center;  /* center label and balance */
-  position: relative;       /* keeps toggle absolute */
-}
-
-#toggle-balance {
-  position: absolute;
-  right: 10px;             /* keep toggle at right */
-  top: 50%;
-  transform: translateY(-50%);
-}
-
+/* ===== Mini-Cards (Checking & Investment) ===== */
 .mini-card {
   display: flex;
-  flex-direction: column;  /* stack label and number vertically */
-  justify-content: center; /* center vertically */
-  align-items: center;     /* center horizontally */
+  flex-direction: column;
+  justify-content: center; /* vertical centering */
+  align-items: center;     /* horizontal centering */
+  width: 48%;              /* keeps two cards side by side */
+  padding: 12px;
+  text-align: center;
+}
+
+.mini-card h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .mini-card p {
-  margin: 0;               /* remove extra margin that can shift number */
-  text-align: center;      /* center horizontally */
-  line-height: 1.2;        /* optional: tighter spacing */
+  font-size: 16px;        /* reduced from 18px */
+  font-weight: 600;       /* professional weight, not too bold */
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;    /* prevent breaking the number */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mini card small text (optional) */
+.mini-card small {
+  display: block;
+  font-size: 12px;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* ===== Balance Header (total label + toggle) ===== */
+.balance-header {
+  display: flex;
+  justify-content: center;  /* center label and balance */
+  align-items: center;
+  position: relative;       /* keeps toggle absolute */
+  gap: 10px;
 }
