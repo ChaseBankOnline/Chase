@@ -1230,4 +1230,24 @@ updateBalancesUI();
     if (accountSettingsBtn) accountSettingsBtn.addEventListener("click", () => window.location.href = "account.html");
     
   });
+
+  // === Single Eye Toggle for All Balances ===
+const toggleBtn = document.getElementById('toggle-balance');
+const balances = document.querySelectorAll('.balance.sensitive');
+
+toggleBtn.addEventListener('click', function() {
+  const eyeIcon = this.querySelector('i');
+
+  if (balances[0].style.filter === "none" || balances[0].style.filter === "") {
+    // Hide all balances
+    balances.forEach(b => b.style.filter = "blur(8px)");
+    eyeIcon.classList.remove('fa-eye');
+    eyeIcon.classList.add('fa-eye-slash');
+  } else {
+    // Show all balances
+    balances.forEach(b => b.style.filter = "none");
+    eyeIcon.classList.remove('fa-eye-slash');
+    eyeIcon.classList.add('fa-eye');
+  }
+});
 })();
