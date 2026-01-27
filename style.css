@@ -1049,3 +1049,23 @@ li span.description {
     font-size: 10px !important;    /* smaller for mobile */
   }
 }
+
+/* ===== Total Balance Label ===== */
+.balance-card .balance-label {
+  display: block;          /* ensures it's on its own line */
+  font-size: 16px;         /* smaller than total balance number */
+  font-weight: 500;        /* professional weight */
+  color: var(--color-muted);
+  margin: 0 auto 8px auto; /* space below the label, centered */
+  text-align: center;      /* center text above the number */
+}
+
+/* ===== Total Balance Number ===== */
+.balance-card .balance {
+  font-size: 24px;         /* bold enough to stand out */
+  font-weight: 600;
+  color: var(--color-primary);
+  text-align: center;      /* keep number centered */
+  margin: 0;               /* remove extra margin from before */
+  white-space: nowrap;
+}
