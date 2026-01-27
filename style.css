@@ -926,16 +926,27 @@ li span.description {
   border-radius: 8px;            /* rounded corners for modern feel */
  }
 
+ .balance-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* keep items aligned to the left */
+  gap: 10px; /* space between "Total Balance" and the toggle button */
+  position: relative; /* allows absolute positioning of toggle */
+}
+
 #toggle-balance {
+  position: absolute; /* float the toggle to the right */
+  right: 10px;        /* distance from card edge */
+  top: 50%;
+  transform: translateY(-50%); /* vertically center */
   background: none;
   border: none;
   cursor: pointer;
   font-size: 18px;
   color: #555;
-  transition: color 0.2s;
-  width: 36px;   /* fixed width */
-  height: 36px;  /* fixed height */
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
 }
