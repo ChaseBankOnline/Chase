@@ -1176,3 +1176,87 @@ li span.description {
     font-size: 14px;
   }
 }
+
+/* ===== Professional Banking Look - Enhanced ===== */
+
+/* 1️⃣ Monthly Spending Trends Card */
+.spending-trends-card {
+  background: linear-gradient(145deg, #2c2c2c, #272727); /* subtle gradient */
+  color: #e6e6e6;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  border-radius: 14px;
+  border-top: 4px solid #005eb8; /* subtle accent line */
+}
+.spending-trends-card h3 {
+  color: #ffffff;
+}
+.spending-trends-card canvas {
+  background-color: #1f1f1f;
+}
+
+/* 2️⃣ Quick Actions Card */
+.quick-actions-card {
+  background: linear-gradient(145deg, #2f2f2f, #282828);
+  color: #e0e0e0;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+.quick-actions-buttons .quick-btn {
+  background-color: #4b4b4b;
+  color: #fff;
+  transition: transform 0.15s ease, box-shadow 0.2s;
+}
+.quick-actions-buttons .quick-btn:hover {
+  background-color: #383838;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* 3️⃣ Recent Transactions */
+.transactions-card,
+.transactions-card li {
+  background: linear-gradient(145deg, #2c2c2c, #272727);
+  color: #e6e6e6;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.transactions-card li.income span:last-child {
+  color: #28a745;
+}
+.transactions-card li.expense span:last-child {
+  color: #dc3545;
+}
+.transactions-card li span.description {
+  color: #f0f0f0;
+}
+
+/* 4️⃣ Transfer / Send Money Form */
+.send-money-card {
+  background: linear-gradient(145deg, #2f2f2f, #272727);
+  color: #e6e6e6;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  border-radius: 14px;
+}
+.send-money-card input,
+.send-money-card select {
+  background-color: #3a3a3a;
+  color: #fff;
+  border: 1px solid #555;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.send-money-card input:focus,
+.send-money-card select:focus {
+  border-color: #005eb8;
+  box-shadow: 0 0 0 3px rgba(0,94,184,0.25);
+}
+.send-money-card button {
+  background-color: #4b4b4b;
+  color: #fff;
+  font-weight: 600;
+  transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+}
+.send-money-card button:hover {
+  background-color: #383838;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
